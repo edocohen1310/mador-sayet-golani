@@ -405,7 +405,7 @@
 // ============================================================
 // CONFIGURATION — paste your Apps Script URL here after setup
 // ============================================================
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEgOxoKJnGpwi3tCXA3OUf4kvaIYHTB5OJr7tVOrNWkh5OohIYWPDAf-lq9B6UzDc5Lg/exec';
+const FIREBASE_URL = 'https://mdor-sayet-golani-default-rtdb.firebaseio.com';
 // ============================================================
 
 const TEAMS = ['מרום', 'סופר', 'יעקבסון'];
@@ -510,21 +510,19 @@ async function loadData(silent = false) {
   const local = JSON.parse(localStorage.getItem('evals_v2') || '[]');
   if (!silent) { S.evaluations = local; }
 
-  if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') { render(); return; }
-
   if (!silent) { S.loading = true; render(); }
   try {
-    const res = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
-    const rows = await res.json();
+    const res = await fetch(FIREBASE_URL + '/evaluations.json?t=' + Date.now());
+    const data = await res.json();
+    const rows = data ? Object.values(data) : [];
     S.evaluations = rows.map(r => ({
       ...r,
       scores: typeof r.scores === 'string' ? JSON.parse(r.scores || '{}') : (r.scores || {}),
     }));
     localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
-    S.lastSync = new Date();
   } catch (e) {
-    console.warn('Sheets load failed:', e);
-    if (!silent) toast('⚠️ טעינה נכשלה — בדוק חיבור לאינטרנט');
+    console.warn('Firebase load failed:', e);
+    if (!silent) toast('⚠️ שגיאת טעינה: ' + e.message.slice(0, 60));
   }
   S.loading = false;
   render();
@@ -542,17 +540,15 @@ async function saveEval(ev) {
   localStorage.setItem('evals_v2', JSON.stringify(arr));
   S.evaluations = arr;
 
-  if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') return;
-
-  // שמירה ל-Sheets — mode:no-cors עוקף בעיות CORS במובייל
+  // שמירה ל-Firebase
   try {
-    await fetch(SCRIPT_URL, {
+    await fetch(FIREBASE_URL + '/evaluations.json', {
       method: 'POST',
-      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(ev),
     });
   } catch (e) {
-    console.warn('Remote save failed:', e);
+    console.warn('Firebase save failed:', e);
   }
 }
 
