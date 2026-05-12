@@ -1473,12 +1473,29 @@ function attachAll() {
   );
 
   // Delete
-  document.getElementById('btn-delete')?.addEventListener('click', () => {
+  document.getElementById('btn-delete')?.addEventListener('click', async () => {
     if (!confirm('למחוק הערכה זו לצמיתות?')) return;
-    S.evaluations = S.evaluations.filter(e => e.id !== S.detailId);
+    const idToDelete = S.detailId;
+    S.evaluations = S.evaluations.filter(e => e.id !== idToDelete);
     localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
     toast('🗑️ ההערכה נמחקה');
     S.direction = 'back'; S.view = S.prevView || 'dashboard'; render();
+
+    // מחיקה גם מ-Firebase: מאתר את המפתח האוטומטי לפי id
+    try {
+      const res = await fetch(FIREBASE_URL + '/evaluations.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          const keysToDelete = Object.keys(data).filter(k => data[k] && data[k].id === idToDelete);
+          for (const k of keysToDelete) {
+            await fetch(FIREBASE_URL + '/evaluations/' + k + '.json', { method: 'DELETE' });
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('Firebase delete failed:', e);
+    }
   });
 }
 
