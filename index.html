@@ -1,0 +1,1506 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>סיירת גולני — מדור לוחמה</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="מדור לוחמה">
+  <meta name="theme-color" content="#1E5128">
+  <link rel="apple-touch-icon" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+  <link rel="shortcut icon" href="icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #EFEBE3;
+      --card: #FFFFFF;
+      --primary: #1E5128;
+      --primary-dark: #123318;
+      --primary-light: rgba(30,81,40,0.1);
+      --accent: #B8941E;
+      --accent-light: rgba(184,148,30,0.12);
+      --brown: #7A5530;
+      --text: #1A1812;
+      --text-secondary: #6A6358;
+      --separator: #DDD8CE;
+      --success: #1E5128;
+      --warning: #B8941E;
+      --danger: #B82020;
+      --star: #B8941E;
+      --shadow: 0 1px 8px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.04);
+      --radius: 14px;
+      --radius-sm: 10px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+
+    body {
+      font-family: 'Rubik', -apple-system, 'Segoe UI', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      direction: rtl;
+      padding-bottom: 80px;
+    }
+
+    /* ======== HEADER ======== */
+    .header {
+      background: rgba(255,255,255,0.88);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--separator);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 54px;
+    }
+    .header-title { font-size: 17px; font-weight: 600; }
+    .header-action {
+      color: var(--primary);
+      font-size: 15px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      font-family: 'Rubik', sans-serif;
+      font-weight: 500;
+      padding: 4px 0;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .header-action:active { opacity: 0.6; }
+
+    /* ======== MAIN ======== */
+    .main {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px 16px 24px;
+    }
+
+    /* ======== CARD ======== */
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+    .card + .card { margin-top: 12px; }
+
+    /* ======== SECTION TITLE ======== */
+    .section-title {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      margin: 22px 0 8px 6px;
+    }
+
+    /* ======== BUTTONS ======== */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 15px 24px;
+      border-radius: var(--radius);
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: transform 0.12s ease, opacity 0.12s ease;
+      -webkit-tap-highlight-color: transparent;
+      width: 100%;
+    }
+    .btn:active { transform: scale(0.97); opacity: 0.88; }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-secondary { background: var(--primary-light); color: var(--primary); }
+    .btn-ghost { background: var(--bg); color: var(--text); }
+    .btn-danger { background: rgba(255,59,48,0.1); color: var(--danger); }
+    .btn-sm { padding: 10px 18px; font-size: 14px; border-radius: var(--radius-sm); width: auto; }
+
+    /* ======== FORM ======== */
+    .form-row {
+      padding: 14px 18px;
+    }
+    .form-row + .form-row { border-top: 1px solid var(--separator); }
+    .form-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      display: block;
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+    .form-input {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1.5px solid var(--separator);
+      border-radius: var(--radius-sm);
+      font-family: 'Rubik', sans-serif;
+      font-size: 16px;
+      color: var(--text);
+      background: var(--bg);
+      outline: none;
+      transition: border-color 0.15s;
+      -webkit-appearance: none;
+    }
+    .form-input:focus { border-color: var(--primary); background: white; }
+    .form-textarea { resize: vertical; min-height: 72px; line-height: 1.5; }
+
+    /* ======== SEGMENT CONTROL ======== */
+    .segment-wrap { padding: 4px; background: var(--bg); border-radius: var(--radius-sm); display: flex; gap: 2px; }
+    .seg-btn {
+      flex: 1; padding: 9px 4px; border: none; border-radius: 8px; background: transparent;
+      font-family: 'Rubik', sans-serif; font-size: 14px; font-weight: 500; cursor: pointer;
+      color: var(--text-secondary); transition: all 0.18s; -webkit-tap-highlight-color: transparent;
+    }
+    .seg-btn.active { background: white; color: var(--text); font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+
+    /* ======== TERRAIN GRID ======== */
+    .terrain-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+    .terrain-tile {
+      display: flex; flex-direction: column; align-items: center; padding: 14px 8px 12px;
+      border-radius: var(--radius); cursor: pointer; border: 2px solid transparent;
+      transition: all 0.18s; background: var(--card); box-shadow: var(--shadow);
+      -webkit-tap-highlight-color: transparent;
+    }
+    .terrain-tile.selected { border-color: var(--primary); background: rgba(0,122,255,0.06); }
+    .terrain-tile:active { transform: scale(0.94); }
+    .terrain-icon { width:30px; height:30px; margin-bottom: 6px; display:flex; align-items:center; justify-content:center; color: var(--text-secondary); }
+    .terrain-tile.selected .terrain-icon { color: var(--primary); }
+    .terrain-label { font-size: 12px; font-weight: 600; text-align: center; color: var(--text); }
+    .terrain-tile.selected .terrain-label { color: var(--primary); }
+
+    /* ======== STAR RATING ======== */
+    .criterion-row {
+      padding: 13px 18px;
+      display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    }
+    .criterion-row + .criterion-row { border-top: 1px solid var(--separator); }
+    .criterion-name { font-size: 14px; color: var(--text); flex: 1; line-height: 1.35; }
+    .stars-row { display: flex; gap: 4px; direction: ltr; flex-shrink: 0; }
+    .star {
+      font-size: 26px; cursor: pointer; transition: transform 0.1s;
+      -webkit-tap-highlight-color: transparent; line-height: 1; user-select: none;
+    }
+    .star:active { transform: scale(0.82); }
+    .star.on { color: var(--star); }
+    .star.off { color: #D1D1D6; }
+
+    /* ======== PROGRESS BAR ======== */
+    .progress-track { height: 3px; background: var(--separator); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.35s ease; }
+    .step-label { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
+
+    /* ======== LEADERBOARD ======== */
+    .lb-item { padding: 16px 18px; display: flex; align-items: center; gap: 14px; }
+    .lb-item + .lb-item { border-top: 1px solid var(--separator); }
+    .rank-num {
+      width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0;
+    }
+    .r1 { background: linear-gradient(135deg,#FFD700,#FFA500); color: #7A4400; }
+    .r2 { background: linear-gradient(135deg,#C0C0C0,#A0A0A0); color: #3C3C3C; }
+    .r3 { background: linear-gradient(135deg,#CD7F32,#A05A20); color: white; }
+    .r-rest { background: var(--bg); color: var(--text-secondary); }
+    .lb-info { flex: 1; min-width: 0; }
+    .lb-name { font-size: 16px; font-weight: 600; margin-bottom: 5px; }
+    .bar-track { height: 7px; background: var(--bg); border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 4px; transition: width 0.7s cubic-bezier(0.34,1.56,0.64,1); }
+    .lb-meta { font-size: 12px; color: var(--text-secondary); margin-top: 4px; }
+    .lb-score { text-align: center; flex-shrink: 0; }
+    .score-big { font-size: 28px; font-weight: 800; line-height: 1; }
+    .score-unit { font-size: 11px; color: var(--text-secondary); }
+
+    /* ======== HISTORY ITEM ======== */
+    .hist-item {
+      padding: 13px 18px; display: flex; align-items: center; justify-content: space-between;
+      cursor: pointer; transition: background 0.12s; -webkit-tap-highlight-color: transparent;
+    }
+    .hist-item:active { background: var(--bg); }
+    .hist-item + .hist-item { border-top: 1px solid var(--separator); }
+    .hist-title { font-size: 15px; font-weight: 500; margin-bottom: 3px; }
+    .hist-sub { font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+
+    .hist-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .hist-score { font-size: 22px; font-weight: 700; }
+    .chevron { color: #C7C7CC; font-size: 16px; font-weight: 300; }
+
+    /* ======== TEAM BADGE ======== */
+    .badge {
+      display: inline-block; padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.2px;
+    }
+    .b-marom     { background: rgba(30,81,40,0.12);   color: #1E5128; }
+    .b-sofer     { background: rgba(184,148,30,0.14); color: #8A6E14; }
+    .b-yaakobson { background: rgba(122,85,48,0.12);  color: #7A5530; }
+
+    /* ======== SCORE COLORS ======== */
+    .c-high { color: var(--success); }
+    .c-mid { color: var(--warning); }
+    .c-low { color: var(--danger); }
+
+    /* ======== EMPTY STATE ======== */
+    .empty { text-align: center; padding: 60px 20px; }
+    .empty-icon { font-size: 52px; margin-bottom: 14px; opacity: 0.6; }
+    .empty-title { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .empty-text { font-size: 14px; color: var(--text-secondary); line-height: 1.6; }
+
+    /* ======== TOAST ======== */
+    .toast {
+      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%) translateY(20px);
+      background: rgba(28,28,30,0.92); color: white; padding: 12px 22px; border-radius: 22px;
+      font-size: 14px; font-weight: 500; opacity: 0; transition: opacity 0.25s, transform 0.25s;
+      z-index: 9999; white-space: nowrap; pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ======== BOTTOM NAV ======== */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid var(--separator);
+      display: flex; padding-bottom: env(safe-area-inset-bottom);
+    }
+    .nav-item {
+      flex: 1; display: flex; flex-direction: column; align-items: center; padding: 8px 4px 6px;
+      cursor: pointer; color: var(--text-secondary); font-size: 10px; font-weight: 500;
+      -webkit-tap-highlight-color: transparent; transition: color 0.15s;
+      border: none; background: none; font-family: 'Rubik', sans-serif;
+    }
+    .nav-item.active { color: var(--primary); }
+    .nav-icon { display:flex; align-items:center; justify-content:center; margin-bottom:3px; width:22px; height:22px; }
+
+    /* ======== BOTTOM ACTION BAR ======== */
+    .action-bar {
+      position: sticky; bottom: 0;
+      background: rgba(255,255,255,0.92); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-top: 1px solid var(--separator);
+      padding: 14px 20px;
+      padding-bottom: calc(14px + env(safe-area-inset-bottom));
+      display: flex; gap: 12px;
+    }
+
+    /* ======== SPINNER ======== */
+    .spinner {
+      width: 20px; height: 20px; border: 2.5px solid rgba(255,255,255,0.35);
+      border-top-color: white; border-radius: 50%; animation: spin 0.75s linear infinite; flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ======== LOADER ======== */
+    .full-loader {
+      position: fixed; inset: 0; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; z-index: 9000; flex-direction: column; gap: 14px;
+    }
+    .full-loader-spin {
+      width: 44px; height: 44px; border: 3px solid var(--separator);
+      border-top-color: var(--primary); border-radius: 50%; animation: spin 0.8s linear infinite;
+    }
+    .full-loader-text { font-size: 14px; color: var(--text-secondary); }
+
+    /* ======== NOTICE ======== */
+    .notice {
+      padding: 14px 16px; border-radius: var(--radius); margin-bottom: 16px;
+      font-size: 13px; line-height: 1.6;
+    }
+    .notice-warning { background: rgba(255,149,0,0.1); border: 1px solid rgba(255,149,0,0.25); color: #9A5500; }
+    .notice code { font-family: monospace; background: rgba(0,0,0,0.08); padding: 1px 5px; border-radius: 4px; }
+
+    /* ======== DETAIL ======== */
+    .detail-header-card { padding: 20px 18px; }
+    .detail-score-badge {
+      width: 72px; height: 72px; border-radius: 50%; display: flex; align-items: center;
+      justify-content: center; font-size: 28px; font-weight: 800; flex-shrink: 0;
+    }
+    .score-bg-high { background: rgba(52,199,89,0.12); }
+    .score-bg-mid { background: rgba(255,149,0,0.12); }
+    .score-bg-low { background: rgba(255,59,48,0.1); }
+
+    /* ======== VIEW TRANSITIONS ======== */
+    .view-forward { animation: viewForward 0.28s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+    .view-back    { animation: viewBack    0.28s cubic-bezier(0.25,0.46,0.45,0.94) both; }
+    .view-fade    { animation: viewFade    0.22s ease both; }
+    @keyframes viewForward { from { opacity:0; transform:translateX(36px);  } to { opacity:1; transform:translateX(0); } }
+    @keyframes viewBack    { from { opacity:0; transform:translateX(-36px); } to { opacity:1; transform:translateX(0); } }
+    @keyframes viewFade    { from { opacity:0; transform:translateY(10px);  } to { opacity:1; transform:translateY(0); } }
+
+    /* ======== STAGGER ENTRANCE ======== */
+    @keyframes fadeSlideUp {
+      from { opacity:0; transform:translateY(16px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .si { animation: fadeSlideUp 0.32s ease both; }
+    .si:nth-child(1){animation-delay:.03s} .si:nth-child(2){animation-delay:.07s}
+    .si:nth-child(3){animation-delay:.11s} .si:nth-child(4){animation-delay:.15s}
+    .si:nth-child(5){animation-delay:.19s} .si:nth-child(6){animation-delay:.23s}
+    .si:nth-child(7){animation-delay:.27s} .si:nth-child(8){animation-delay:.31s}
+
+    /* ======== SHAKE (VALIDATION ERROR) ======== */
+    @keyframes shake {
+      0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-6px)} 40%,80%{transform:translateX(6px)}
+    }
+    .shake { animation: shake 0.36s ease !important; border-color: var(--danger) !important; }
+
+    /* ======== RIPPLE ======== */
+    .btn { position: relative; overflow: hidden; }
+    .ripple {
+      position:absolute; border-radius:50%; pointer-events:none;
+      background:rgba(255,255,255,0.38); transform:scale(0);
+      animation: rippleOut 0.55s linear forwards;
+    }
+    @keyframes rippleOut { to { transform:scale(4); opacity:0; } }
+
+    /* ======== SUCCESS SCREEN ======== */
+    .success-wrap {
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      min-height:70vh; text-align:center; padding:40px 24px;
+    }
+    .success-circle {
+      width:88px; height:88px; border-radius:50%;
+      background:rgba(30,81,40,0.12); display:flex; align-items:center; justify-content:center;
+      margin-bottom:24px; color:var(--primary);
+      animation: checkBounce 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
+    }
+    .success-circle svg { width:42px; height:42px; stroke-width:2.5; }
+    @keyframes checkBounce { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    .success-title { font-size:26px; font-weight:700; margin-bottom:8px; animation:viewFade 0.4s 0.3s both; }
+    .success-sub   { font-size:15px; color:var(--text-secondary); animation:viewFade 0.4s 0.45s both; }
+    .success-score { font-size:56px; font-weight:800; margin:20px 0 4px; animation:checkBounce 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.5s both; }
+    .success-score-label { font-size:13px; color:var(--text-secondary); animation:viewFade 0.4s 0.7s both; }
+
+    /* ======== STAR HOVER ======== */
+    .star.preview { color: var(--star); opacity: 0.55; }
+
+    /* ======== LEADERBOARD BAR (animated via JS) ======== */
+    .bar-fill { transition: width 0.75s cubic-bezier(0.34,1.56,0.64,1); }
+
+    /* ======== RECENT MINI CARD ======== */
+    .mini-row { padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; }
+    .mini-row + .mini-row { border-top: 1px solid var(--separator); }
+    .mini-title { font-size: 14px; font-weight: 500; }
+    .mini-sub { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+    .mini-score { font-size: 20px; font-weight: 700; }
+
+    @media (max-width: 400px) {
+      .terrain-label { font-size: 11px; }
+      .star { font-size: 24px; }
+    }
+  </style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+// CONFIGURATION — paste your Apps Script URL here after setup
+// ============================================================
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwEgOxoKJnGpwi3tCXA3OUf4kvaIYHTB5OJr7tVOrNWkh5OohIYWPDAf-lq9B6UzDc5Lg/exec';
+// ============================================================
+
+const TEAMS = ['מרום', 'סופר', 'יעקבסון'];
+
+const TEAM_META = {
+  'מרום':     { cls: 'b-marom',     color: '#1E5128' },
+  'סופר':     { cls: 'b-sofer',     color: '#B8941E' },
+  'יעקבסון':  { cls: 'b-yaakobson', color: '#7A5530' },
+};
+
+const ICONS = {
+  dashboard: `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>`,
+  history:   `<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>`,
+  plus:      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  check:     `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  arrowUp:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`,
+  trash:     `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>`,
+  warning:   `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>`,
+  building:  `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M9 21V9h6v12"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/><line x1="9" y1="18" x2="15" y2="18"/></svg>`,
+  brush:     `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/></svg>`,
+  orchard:   `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22v-8"/><path d="M5 11a7 7 0 0 1 14 0"/><path d="M3 15a9 9 0 0 1 18 0" opacity=".4"/></svg>`,
+  medical:   `<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-2"/><rect x="8" y="2" width="8" height="6" rx="1"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>`,
+  save:      `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>`,
+};
+
+const TERRAINS = [
+  { key: 'בנוי',   iconKey: 'building', label: 'בנוי'   },
+  { key: 'סבך',   iconKey: 'brush',    label: 'סבך'   },
+  { key: 'מטעים', iconKey: 'orchard',  label: 'מטעים' },
+  { key: 'ארן',   iconKey: 'medical',  label: 'ארן'   },
+];
+
+const UNIVERSAL = {
+  'פיקוד ושליטה (מפק"צ)': [
+    'הערכת מצב וקבלת החלטות',
+    'פקודות סדורות',
+    'מיקום מפקד',
+    'יציבות ובהירות לכוח',
+    'שיח מול מקבילים/רממ',
+    'מיצוי אמלח',
+  ],
+  'הערכת הצוות': [
+    'רוח הצוות',
+    'לוחמת פרט',
+    'חזרה אחרי פקודות',
+  ],
+};
+
+const TERRAIN_CRITERIA = {
+  'בנוי':   ['נתיב התקדמות', 'עבודת פנים מבנה', 'קצת לחימה (גז ברקס)', 'מיקסום חיפויים', 'ניהול התקלה', 'ניהול פצועים', 'הפחתה'],
+  'סבך':   ['התמצאות וכיוון לחימה', 'שליטת הצוות בתצורות פריסה והתקדמות', 'קצב לחימה (גז ברקס)', 'ניהול התקלה', 'ניהול פצועים', 'אגרסיביות בסבך'],
+  'מטעים': ['שליטת הצוות בתצורות פריסה והתקדמות', 'ריבוי סימוני זיהוי מוסכמים', 'קצב לחימה (גז ברקס)', 'תפיסת מחסות', 'ניהול התקלה', 'ניהול פצועים'],
+  'ארן':   ['עבודת מפקצ בציר אגמי', 'עבודת מחר בניהול האירוע', 'טיפול מלא של החובשים', 'הפיכת קערה בעת אירוע', 'ניהול התקלה', 'טיפול הלוחמים'],
+};
+
+const EXERCISE_NAMES = {
+  'בנוי':   ['עמוקה','קרן נפתלי','מערות יוסי','אזור תעשייה דלתון','מנחת דלתון','ג\'יש','ספסופה','צפת','נוף כנרת','אליפלט','חצור','בונקר אודם','מסעדה','עין קניא','תת קרקע'],
+  'סבך':   ['שס"מ צבעון','שס"מ בר יוחאי','שס"מ מסעדה'],
+  'מטעים': ['רחאניה'],
+  'ארן':   ['דישון','צבעון'],
+};
+
+// ============================================================
+// STATE
+// ============================================================
+const S = {
+  view: 'dashboard',   // dashboard | new-eval | history | detail | success | coach-view | exercise-compare
+  step: 1,
+  direction: 'fade',
+  prevView: 'dashboard',
+  detailId: null,
+  successData: null,
+  evaluations: [],
+  loading: false,
+  form: freshForm(),
+  teamFilter: null,
+  exerciseFilter: null,
+};
+
+function freshForm() {
+  return {
+    coachName: '',
+    exerciseName: '',
+    team: '',
+    terrainType: '',
+    date: todayStr(),
+    scores: {},
+    preserve: ['', ''],
+    improve: ['', ''],
+    notes: '',
+  };
+}
+
+function todayStr() {
+  return new Date().toISOString().split('T')[0];
+}
+
+// ============================================================
+// DATA
+// ============================================================
+async function loadData(silent = false) {
+  const local = JSON.parse(localStorage.getItem('evals_v2') || '[]');
+  if (!silent) { S.evaluations = local; }
+
+  if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') { render(); return; }
+
+  if (!silent) { S.loading = true; render(); }
+  try {
+    const res = await fetch(SCRIPT_URL + '?t=' + Date.now(), { cache: 'no-store' });
+    const rows = await res.json();
+    S.evaluations = rows.map(r => ({
+      ...r,
+      scores: typeof r.scores === 'string' ? JSON.parse(r.scores || '{}') : (r.scores || {}),
+    }));
+    localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
+    S.lastSync = new Date();
+  } catch (e) {
+    console.warn('Sheets load failed:', e);
+    if (!silent) toast('⚠️ טעינה נכשלה — בדוק חיבור לאינטרנט');
+  }
+  S.loading = false;
+  render();
+}
+
+// רענון אוטומטי כל 30 שניות
+setInterval(() => {
+  if (S.view === 'dashboard' || S.view === 'history') loadData(true);
+}, 30000);
+
+async function saveEval(ev) {
+  // שמירה מקומית
+  const arr = JSON.parse(localStorage.getItem('evals_v2') || '[]');
+  arr.push(ev);
+  localStorage.setItem('evals_v2', JSON.stringify(arr));
+  S.evaluations = arr;
+
+  if (SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE') return;
+
+  // שמירה ל-Sheets — mode:no-cors עוקף בעיות CORS במובייל
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      body: JSON.stringify(ev),
+    });
+  } catch (e) {
+    console.warn('Remote save failed:', e);
+  }
+}
+
+// ============================================================
+// HELPERS
+// ============================================================
+function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+
+function avg(scores) {
+  const vals = Object.values(scores).filter(v => v > 0);
+  return vals.length ? vals.reduce((a, b) => a + b, 0) / vals.length : 0;
+}
+
+function fmtDate(d) {
+  if (!d) return '';
+  const [y, m, day] = d.split('-');
+  return `${day}/${m}/${y}`;
+}
+
+function scoreClass(v) {
+  const n = parseFloat(v);
+  return n >= 4 ? 'c-high' : n >= 3 ? 'c-mid' : n > 0 ? 'c-low' : '';
+}
+
+function scoreBgClass(v) {
+  const n = parseFloat(v);
+  return n >= 4 ? 'score-bg-high' : n >= 3 ? 'score-bg-mid' : 'score-bg-low';
+}
+
+function teamBadge(team) {
+  const m = TEAM_META[team] || {};
+  return `<span class="badge ${m.cls || ''}">${team}</span>`;
+}
+
+function teamStats() {
+  return TEAMS.map(team => {
+    const evs = S.evaluations.filter(e => e.team === team);
+    const a = evs.length ? evs.reduce((s, e) => s + parseFloat(e.avgScore || 0), 0) / evs.length : 0;
+    return { team, avg: a, count: evs.length };
+  }).sort((a, b) => b.avg - a.avg);
+}
+
+function recentForTeam(team, n = 3) {
+  return S.evaluations
+    .filter(e => e.team === team)
+    .sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date))
+    .slice(0, n);
+}
+
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(() => el.classList.remove('show'), 2600);
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function render() {
+  const app = document.getElementById('app');
+
+  if (S.loading) {
+    app.innerHTML = `
+      <div class="full-loader">
+        <div class="full-loader-spin"></div>
+        <div class="full-loader-text">טוען נתונים...</div>
+      </div>`;
+    return;
+  }
+
+  const viewClass = `view-${S.direction}`;
+  let html = '';
+  switch (S.view) {
+    case 'dashboard':        html = vDashboard(viewClass);       break;
+    case 'new-eval':         html = vNewEval(viewClass);          break;
+    case 'history':          html = vHistory(viewClass);          break;
+    case 'detail':           html = vDetail(viewClass);           break;
+    case 'success':          html = vSuccess(viewClass);          break;
+    case 'team-view':        html = vTeamView(viewClass);         break;
+    case 'exercise-compare': html = vExerciseCompare(viewClass);  break;
+  }
+  if (S.view !== 'new-eval' && S.view !== 'success') {
+    html += vNav();
+  }
+  app.innerHTML = html;
+  attachAll();
+  animateBars();
+  countUpScores();
+  setupRipples();
+}
+
+// animate leaderboard bars: start at 0 → target via CSS transition
+function animateBars() {
+  requestAnimationFrame(() => {
+    document.querySelectorAll('.bar-fill[data-w]').forEach((el, i) => {
+      setTimeout(() => { el.style.width = el.dataset.w; }, i * 120);
+    });
+  });
+}
+
+// count-up animation for .score-count elements
+function countUpScores() {
+  document.querySelectorAll('.score-count').forEach(el => {
+    const target = parseFloat(el.dataset.target);
+    if (!target) return;
+    const dur = 800, start = performance.now();
+    const tick = now => {
+      const p = Math.min((now - start) / dur, 1);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = (target * ease).toFixed(1);
+      if (p < 1) requestAnimationFrame(tick);
+    };
+    requestAnimationFrame(tick);
+  });
+}
+
+function setupRipples() {
+  document.querySelectorAll('.btn').forEach(btn => {
+    btn.addEventListener('pointerdown', e => {
+      const r = document.createElement('span');
+      r.className = 'ripple';
+      const rect = btn.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+      btn.appendChild(r);
+      setTimeout(() => r.remove(), 600);
+    });
+  });
+}
+
+function haptic(ms = 10) {
+  try { navigator.vibrate?.(ms); } catch(_) {}
+}
+
+function shakeEl(el) {
+  if (!el) return;
+  el.classList.remove('shake');
+  void el.offsetWidth;
+  el.classList.add('shake');
+  setTimeout(() => el.classList.remove('shake'), 400);
+}
+
+// ============================================================
+// NAV
+// ============================================================
+function vNav() {
+  const tabs = [
+    { id: 'dashboard', icon: ICONS.dashboard, label: 'דשבורד' },
+    { id: 'history',   icon: ICONS.history,   label: 'היסטוריה' },
+  ];
+  return `
+    <nav class="bottom-nav">
+      ${tabs.map(t => `
+        <button class="nav-item ${S.view === t.id ? 'active' : ''}" data-nav="${t.id}">
+          <span class="nav-icon">${t.icon}</span>${t.label}
+        </button>
+      `).join('')}
+    </nav>`;
+}
+
+// ============================================================
+// DASHBOARD
+// ============================================================
+function vDashboard(vc = 'view-fade') {
+  const stats = teamStats();
+  const recent = [...S.evaluations]
+    .sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date))
+    .slice(0, 5);
+  const needsConfig = SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE';
+
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;padding:12px 16px 10px;flex-direction:column;align-items:stretch;gap:10px;min-height:unset;">
+        <div style="display:flex;align-items:center;justify-content:space-between;">
+          <img src="סמלים/saieret_nobg.png" alt="סיירת גולני" style="height:48px;width:auto;filter:brightness(0) invert(1);opacity:0.92;">
+          <div style="text-align:center;flex:1;">
+            <div style="font-size:11px;font-weight:500;color:rgba(255,255,255,0.65);letter-spacing:1px;">מדור לוחמה</div>
+            <div style="font-size:18px;font-weight:700;color:white;letter-spacing:0.3px;">סיירת גולני</div>
+            <div style="font-size:12px;color:var(--accent);font-weight:500;margin-top:1px;">הערכת תרגילים</div>
+          </div>
+          <img src="סמלים/tree_nobg.png" alt="גולני" style="height:48px;width:auto;filter:brightness(0) invert(1);opacity:0.92;">
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <button class="header-action" id="btn-new" style="color:var(--accent);background:rgba(255,255,255,0.1);padding:7px 16px;border-radius:10px;display:flex;align-items:center;gap:6px;font-size:14px;">${ICONS.plus} הערכה חדשה</button>
+          <button class="header-action" id="btn-refresh" style="color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.08);padding:7px 12px;border-radius:10px;font-size:13px;">↻ רענן</button>
+        </div>
+      </div>
+      <div class="main">
+        ${needsConfig ? `
+          <div class="notice notice-warning si" style="display:flex;gap:10px;align-items:flex-start;">
+            <span style="flex-shrink:0;margin-top:1px">${ICONS.warning}</span>
+            <span><strong>הגדרה נדרשת:</strong> החלף את <code>YOUR_SCRIPT_URL_HERE</code>
+            ב-URL של Google Apps Script לסנכרון בין מכשירים.
+            כרגע הנתונים נשמרים <strong>רק במכשיר הזה</strong>.</span>
+          </div>` : ''}
+
+        <div class="section-title">דירוג צוותים</div>
+        <div class="card">
+          ${stats.map((s, i) => {
+            const rankCls = ['r1','r2','r3'][i] || 'r-rest';
+            const pct = s.avg ? (s.avg / 5 * 100).toFixed(1) : 0;
+            const color = TEAM_META[s.team]?.color || '#888';
+            return `
+              <div class="lb-item si">
+                <div class="rank-num ${rankCls}">${i + 1}</div>
+                <div class="lb-info">
+                  <div class="lb-name" data-team-filter="${s.team}" style="cursor:pointer;text-decoration:underline;text-underline-offset:3px;">${s.team}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" data-w="${pct}%" style="width:0%;background:${color}"></div>
+                  </div>
+                  <div class="lb-meta">${s.count} תרגילים</div>
+                </div>
+                <div class="lb-score">
+                  ${s.count > 0
+                    ? `<div class="score-big score-count ${scoreClass(s.avg)}" data-target="${(s.avg * 20).toFixed(1)}">0</div>`
+                    : `<div class="score-big" style="color:var(--text-secondary);font-size:22px">—</div>`}
+                  <div class="score-unit">מתוך 100</div>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>
+
+        ${recent.length > 0 ? `
+          <div class="section-title">פעילות אחרונה</div>
+          <div class="card">
+            ${recent.map(e => `
+              <div class="hist-item si" data-detail="${e.id}">
+                <div>
+                  <div class="hist-title">${e.exerciseName}</div>
+                  <div class="hist-sub">
+                    ${teamBadge(e.team)}
+                    <span>${e.terrainType}</span>
+                    <span>${fmtDate(e.date)}</span>
+                    ${e.coachName ? `<span>${e.coachName}</span>` : ''}
+                  </div>
+                </div>
+                <div class="hist-right">
+                  <span class="hist-score ${scoreClass(e.avgScore)}">${parseFloat(e.avgScore||0).toFixed(1)}</span>
+                  <span class="chevron">›</span>
+                </div>
+              </div>`).join('')}
+          </div>` : `
+          <div class="empty si">
+            <div class="empty-icon"><img src="סמלים/saieret_nobg.png" style="height:64px;opacity:0.18;filter:grayscale(1)"></div>
+            <div class="empty-title">אין הערכות עדיין</div>
+            <div class="empty-text">לחץ על "חדש" להתחלה</div>
+          </div>`}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// NEW EVAL
+// ============================================================
+function vNewEval(vc = 'view-forward') {
+  const titles = ['פרטים כלליים', 'דירוג קריטריונים', 'שימור ושיפור'];
+  const pct = (S.step / 3 * 100).toFixed(0);
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;">
+        <button class="header-action" id="btn-back" style="color:rgba(255,255,255,0.8);font-size:15px;">${S.step > 1 ? '‹ חזור' : '✕ ביטול'}</button>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <img src="סמלים/saieret_nobg.png" style="height:26px;filter:brightness(0) invert(1);opacity:0.8;">
+          <div class="header-title" style="color:white;">${titles[S.step - 1]}</div>
+        </div>
+        <div style="width:64px"></div>
+      </div>
+      <div class="main">
+        <div class="progress-track"><div class="progress-fill" style="width:${pct}%"></div></div>
+        <div class="step-label">שלב ${S.step} מתוך 3</div>
+        ${S.step === 1 ? vStep1() : S.step === 2 ? vStep2() : vStep3()}
+      </div>
+      <div class="action-bar">
+        ${S.step < 3
+          ? `<button class="btn btn-primary" id="btn-next">המשך ›</button>`
+          : `<button class="btn btn-primary" id="btn-submit" style="display:flex;align-items:center;gap:8px;">${ICONS.save} שמור הערכה</button>`}
+      </div>
+    </div>`;
+}
+
+function vStep1() {
+  const f = S.form;
+  const recent = f.team ? recentForTeam(f.team) : [];
+  return `
+    <div class="card">
+      <div class="form-row">
+        <label class="form-label">שם החונך</label>
+        <input class="form-input" id="f-coach" type="text" placeholder="הכנס שם..." value="${esc(f.coachName)}">
+      </div>
+      <div class="form-row">
+        <label class="form-label">תאריך</label>
+        <input class="form-input" id="f-date" type="date" value="${f.date}">
+      </div>
+    </div>
+
+    <div class="section-title">צוות</div>
+    <div class="card">
+      <div class="form-row">
+        <div class="segment-wrap">
+          ${TEAMS.map(t => `<button class="seg-btn ${f.team === t ? 'active' : ''}" data-team="${t}">${t}</button>`).join('')}
+        </div>
+      </div>
+    </div>
+
+    <div class="section-title">תא שטח</div>
+    <div class="terrain-grid">
+      ${TERRAINS.map(tr => `
+        <div class="terrain-tile ${f.terrainType === tr.key ? 'selected' : ''}" data-terrain="${tr.key}">
+          <div class="terrain-icon">${ICONS[tr.iconKey]}</div>
+          <div class="terrain-label">${tr.label}</div>
+        </div>`).join('')}
+    </div>
+
+    <div class="section-title">שם התרגיל</div>
+    <div class="card">
+      <div class="form-row">
+        ${f.terrainType && EXERCISE_NAMES[f.terrainType] ? `
+          <select class="form-input" id="f-exercise" style="cursor:pointer;">
+            <option value="">— בחר תרגיל —</option>
+            ${EXERCISE_NAMES[f.terrainType].map(n =>
+              `<option value="${esc(n)}" ${f.exerciseName === n ? 'selected' : ''}>${n}</option>`
+            ).join('')}
+          </select>` : `
+          <select class="form-input" id="f-exercise" disabled style="opacity:0.45;cursor:not-allowed;">
+            <option>בחר תחילה תא שטח</option>
+          </select>`}
+      </div>
+    </div>
+
+    ${f.team && recent.length > 0 ? `
+      <div class="section-title">תרגילים אחרונים — ${f.team}</div>
+      <div class="card">
+        ${recent.map(e => `
+          <div class="mini-row" data-detail="${e.id}" style="cursor:pointer">
+            <div>
+              <div class="mini-title">${e.exerciseName}</div>
+              <div class="mini-sub">${e.terrainType} · ${fmtDate(e.date)}</div>
+            </div>
+            <span class="mini-score ${scoreClass(e.avgScore)}">${parseFloat(e.avgScore||0).toFixed(1)}</span>
+          </div>`).join('')}
+      </div>` : f.team ? `
+      <div class="section-title">תרגילים אחרונים — ${f.team}</div>
+      <div class="card">
+        <div class="form-row" style="color:var(--text-secondary);text-align:center;font-size:14px">אין תרגילים קודמים לצוות ${f.team}</div>
+      </div>` : ''}
+  `;
+}
+
+function vStep2() {
+  const f = S.form;
+  const terrainCriteria = TERRAIN_CRITERIA[f.terrainType] || [];
+
+  let html = '';
+  Object.entries(UNIVERSAL).forEach(([section, criteria]) => {
+    html += `<div class="section-title">${section}</div><div class="card">`;
+    criteria.forEach(c => html += criterionRow(c, f.scores[c] || 0));
+    html += '</div>';
+  });
+
+  if (terrainCriteria.length) {
+    html += `<div class="section-title">ספציפי לתא שטח — ${f.terrainType}</div><div class="card">`;
+    terrainCriteria.forEach(c => html += criterionRow(c, f.scores[c] || 0));
+    html += '</div>';
+  }
+  return html;
+}
+
+function criterionRow(c, score) {
+  const ec = esc(c);
+  const stars = [1,2,3,4,5].map(n =>
+    `<span class="star ${n <= score ? 'on' : 'off'}" data-val="${n}" data-criterion="${ec}">★</span>`
+  ).join('');
+  return `
+    <div class="criterion-row">
+      <div class="criterion-name">${c}</div>
+      <div class="stars-row" data-crit="${ec}">${stars}</div>
+    </div>`;
+}
+
+function vStep3() {
+  const f = S.form;
+  return `
+    <div class="section-title" style="display:flex;align-items:center;gap:6px;"><span style="color:var(--success)">${ICONS.check}</span> נקודות שימור</div>
+    <div class="card">
+      <div class="form-row">
+        <label class="form-label">שימור 1</label>
+        <textarea class="form-input form-textarea" id="p0" placeholder="מה הצוות עשה טוב...">${esc(f.preserve[0])}</textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label">שימור 2</label>
+        <textarea class="form-input form-textarea" id="p1" placeholder="נקודה חיובית נוספת...">${esc(f.preserve[1])}</textarea>
+      </div>
+    </div>
+    <div class="section-title" style="display:flex;align-items:center;gap:6px;"><span style="color:var(--accent)">${ICONS.arrowUp}</span> נקודות שיפור</div>
+    <div class="card">
+      <div class="form-row">
+        <label class="form-label">שיפור 1</label>
+        <textarea class="form-input form-textarea" id="i0" placeholder="מה ניתן לשפר...">${esc(f.improve[0])}</textarea>
+      </div>
+      <div class="form-row">
+        <label class="form-label">שיפור 2</label>
+        <textarea class="form-input form-textarea" id="i1" placeholder="נקודת שיפור נוספת...">${esc(f.improve[1])}</textarea>
+      </div>
+    </div>
+    <div class="section-title">התייחסות חופשית</div>
+    <div class="card">
+      <div class="form-row">
+        <textarea class="form-input form-textarea" id="f-notes" rows="4" placeholder="הערות כלליות, הקשר נוסף, תצפיות...">${esc(f.notes)}</textarea>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// TEAM VIEW
+// ============================================================
+function vTeamView(vc = 'view-forward') {
+  const team = S.teamFilter;
+  const evs = S.evaluations.filter(e => e.team === team);
+  const byEx = {};
+  evs.forEach(e => {
+    if (!byEx[e.exerciseName]) byEx[e.exerciseName] = [];
+    byEx[e.exerciseName].push(e);
+  });
+  const exercises = Object.entries(byEx).sort((a, b) => {
+    const lastA = Math.max(...a[1].map(x => new Date(x.timestamp || x.date)));
+    const lastB = Math.max(...b[1].map(x => new Date(x.timestamp || x.date)));
+    return lastB - lastA;
+  });
+  const color = TEAM_META[team]?.color || 'var(--primary)';
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;">
+        <button class="header-action" id="btn-back-team" style="color:rgba(255,255,255,0.8);">‹ חזור</button>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <img src="סמלים/saieret_nobg.png" style="height:26px;filter:brightness(0) invert(1);opacity:0.8;">
+          <div class="header-title" style="color:white;">צוות ${team}</div>
+        </div>
+        <div style="width:64px"></div>
+      </div>
+      <div class="main">
+        <div class="section-title">תרגילים (${exercises.length})</div>
+        ${exercises.length === 0 ? '<div class="card"><div class="form-row" style="color:var(--text-secondary);text-align:center">אין הערכות לצוות זה</div></div>' : `
+        <div class="card">
+          ${exercises.map(([name, list]) => {
+            const avgAll = list.reduce((s, e) => s + parseFloat(e.avgScore || 0), 0) / list.length;
+            const coaches = [...new Set(list.map(e => e.coachName).filter(Boolean))].join(', ');
+            return `
+              <div class="hist-item si" data-exercise="${esc(name)}" style="cursor:pointer;">
+                <div style="flex:1;min-width:0">
+                  <div class="hist-title">${name}</div>
+                  <div class="hist-sub">
+                    <span>${list[0]?.terrainType || ''}</span>
+                    ${coaches ? `<span>${coaches}</span>` : ''}
+                    <span>${fmtDate(list[list.length-1]?.date)}</span>
+                  </div>
+                </div>
+                <div class="hist-right">
+                  <span class="hist-score ${scoreClass(avgAll)}">${(avgAll * 20).toFixed(0)}</span>
+                  <span class="chevron">›</span>
+                </div>
+              </div>`;
+          }).join('')}
+        </div>`}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// EXERCISE COMPARE
+// ============================================================
+function vExerciseCompare(vc = 'view-forward') {
+  const name = S.exerciseFilter;
+  const evs = S.evaluations.filter(e => e.exerciseName === name);
+  const byTeam = {};
+  evs.forEach(e => {
+    if (!byTeam[e.team]) byTeam[e.team] = [];
+    byTeam[e.team].push(e);
+  });
+  const teams = Object.entries(byTeam).map(([team, list]) => {
+    const avg = list.reduce((s, e) => s + parseFloat(e.avgScore || 0), 0) / list.length;
+    return { team, list, avg };
+  }).sort((a, b) => b.avg - a.avg);
+
+  // Collect all criteria across all evals for this exercise
+  const allCriteria = evs.length ? Object.keys(evs[0].scores || {}) : [];
+
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;">
+        <button class="header-action" id="btn-back-exercise" style="color:rgba(255,255,255,0.8);">‹ חזור</button>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <img src="סמלים/saieret_nobg.png" style="height:24px;filter:brightness(0) invert(1);opacity:0.8;">
+          <div class="header-title" style="color:white;font-size:14px;text-align:center;">${name}</div>
+        </div>
+        <div style="width:64px"></div>
+      </div>
+      <div class="main">
+        <div class="section-title">השוואת צוותים</div>
+        <div class="card">
+          ${teams.map((t, i) => {
+            const pct = (t.avg / 5 * 100).toFixed(1);
+            const color = TEAM_META[t.team]?.color || '#888';
+            return `
+              <div class="lb-item si">
+                <div class="rank-num ${['r1','r2','r3'][i] || 'r-rest'}">${i + 1}</div>
+                <div class="lb-info">
+                  <div class="lb-name">${t.team}</div>
+                  <div class="bar-track">
+                    <div class="bar-fill" data-w="${pct}%" style="width:0%;background:${color}"></div>
+                  </div>
+                  <div class="lb-meta">${t.list.length} הערכות · ${t.list.map(e => e.coachName).join(', ')}</div>
+                </div>
+                <div class="lb-score">
+                  <div class="score-big ${scoreClass(t.avg)}">${(t.avg * 20).toFixed(0)}</div>
+                  <div class="score-unit">מתוך 100</div>
+                </div>
+              </div>`;
+          }).join('')}
+          ${teams.length === 0 ? '<div class="form-row" style="color:var(--text-secondary);text-align:center">אין נתונים</div>' : ''}
+        </div>
+
+        ${allCriteria.length > 0 ? `
+          <div class="section-title">פירוט קריטריונים</div>
+          <div class="card">
+            ${allCriteria.map(c => {
+              const teamScores = teams.map(t => {
+                const scores = t.list.map(e => (e.scores || {})[c] || 0);
+                const avg = scores.reduce((a, b) => a + b, 0) / (scores.length || 1);
+                return { team: t.team, avg, color: TEAM_META[t.team]?.color || '#888' };
+              });
+              return `
+                <div class="criterion-row" style="flex-direction:column;align-items:flex-start;gap:6px;padding:10px 16px;">
+                  <div class="criterion-name" style="font-size:13px">${c}</div>
+                  <div style="display:flex;gap:10px;width:100%">
+                    ${teamScores.map(ts => `
+                      <div style="flex:1;text-align:center;">
+                        <div style="font-size:11px;color:var(--text-secondary);margin-bottom:3px">${ts.team}</div>
+                        <div style="font-size:16px;font-weight:600;color:${ts.color}">${ts.avg.toFixed(1)}</div>
+                      </div>`).join('')}
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>` : ''}
+
+        ${teams.some(t => t.list.some(e => e.preserve1 || e.preserve2 || e.improve1 || e.improve2 || e.notes)) ? `
+          <div class="section-title">שימור, שיפור ודגשים</div>
+          ${teams.map(t => {
+            const relevant = t.list.filter(e => e.preserve1 || e.preserve2 || e.improve1 || e.improve2 || e.notes);
+            if (!relevant.length) return '';
+            const color = TEAM_META[t.team]?.color || 'var(--primary)';
+            return `
+              <div class="section-title" style="color:${color};margin-top:10px">צוות ${t.team}</div>
+              <div class="card">
+                ${relevant.map(e => `
+                  ${e.coachName ? `<div class="form-row" style="font-size:11px;color:var(--text-secondary);padding-bottom:0">${e.coachName} · ${fmtDate(e.date)}</div>` : ''}
+                  ${(e.preserve1 || e.preserve2) ? `
+                    <div class="form-row" style="padding-bottom:4px">
+                      <div style="font-size:11px;font-weight:600;color:var(--success);margin-bottom:4px;display:flex;align-items:center;gap:4px;">${ICONS.check} שימור</div>
+                      ${e.preserve1 ? `<div style="font-size:14px;line-height:1.5;color:var(--text)">${e.preserve1}</div>` : ''}
+                      ${e.preserve2 ? `<div style="font-size:14px;line-height:1.5;color:var(--text);margin-top:3px">${e.preserve2}</div>` : ''}
+                    </div>` : ''}
+                  ${(e.improve1 || e.improve2) ? `
+                    <div class="form-row" style="padding-bottom:4px;border-top:1px solid var(--separator)">
+                      <div style="font-size:11px;font-weight:600;color:var(--accent);margin-bottom:4px;display:flex;align-items:center;gap:4px;">${ICONS.arrowUp} שיפור</div>
+                      ${e.improve1 ? `<div style="font-size:14px;line-height:1.5;color:var(--text)">${e.improve1}</div>` : ''}
+                      ${e.improve2 ? `<div style="font-size:14px;line-height:1.5;color:var(--text);margin-top:3px">${e.improve2}</div>` : ''}
+                    </div>` : ''}
+                  ${e.notes ? `
+                    <div class="form-row" style="border-top:1px solid var(--separator)">
+                      <div style="font-size:11px;font-weight:600;color:var(--brown);margin-bottom:4px">דגשים נוספים</div>
+                      <div style="font-size:14px;line-height:1.6;color:var(--text);white-space:pre-wrap">${e.notes}</div>
+                    </div>` : ''}
+                `).join('')}
+              </div>`;
+          }).join('')}` : ''}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// HISTORY
+// ============================================================
+function vHistory(vc = 'view-fade') {
+  const sorted = [...S.evaluations].sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date));
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <img src="סמלים/saieret_nobg.png" alt="" style="height:34px;filter:brightness(0) invert(1);opacity:0.85;">
+          <div class="header-title" style="color:white;">היסטוריית תרגילים</div>
+          <img src="סמלים/tree_nobg.png" alt="" style="height:34px;filter:brightness(0) invert(1);opacity:0.85;">
+        </div>
+      </div>
+      <div class="main">
+        ${sorted.length === 0 ? `
+          <div class="empty">
+            <div class="empty-icon"><img src="סמלים/saieret_nobg.png" style="height:64px;opacity:0.18;filter:grayscale(1)"></div>
+            <div class="empty-title">אין הערכות עדיין</div>
+            <div class="empty-text">ההערכות שתמלאו יופיעו כאן</div>
+          </div>` : `
+          <div class="card">
+            ${sorted.map(e => `
+              <div class="hist-item si" data-detail="${e.id}">
+                <div>
+                  <div class="hist-title">${e.exerciseName}</div>
+                  <div class="hist-sub">
+                    ${teamBadge(e.team)}
+                    <span>${e.terrainType}</span>
+                    <span>${fmtDate(e.date)}</span>
+                    ${e.coachName ? `<span>${e.coachName}</span>` : ''}
+                  </div>
+                </div>
+                <div class="hist-right">
+                  <span class="hist-score ${scoreClass(e.avgScore)}">${parseFloat(e.avgScore||0).toFixed(1)}</span>
+                  <span class="chevron">›</span>
+                </div>
+              </div>`).join('')}
+          </div>`}
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// SUCCESS
+// ============================================================
+function vSuccess(vc = 'view-fade') {
+  const d = S.successData || {};
+  const a = parseFloat(d.avgScore || 0);
+  return `
+    <div class="${vc}">
+      <div class="success-wrap">
+        <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:8px;">
+          <img src="סמלים/saieret_nobg.png" style="height:56px;opacity:0.85;">
+          <img src="סמלים/tree_nobg.png" style="height:56px;opacity:0.85;">
+        </div>
+        <div class="success-circle" style="background:rgba(30,81,40,0.12);color:var(--primary)">${ICONS.check}</div>
+        <div class="success-title">ההערכה נשמרה!</div>
+        <div class="success-sub">${d.exerciseName || ''} · ${d.team || ''}</div>
+        <div class="success-score ${scoreClass(a)}">${a.toFixed(1)}</div>
+        <div class="success-score-label">ציון ממוצע מתוך 5</div>
+        <div style="margin-top:18px;font-size:15px;font-weight:600;color:var(--primary);text-align:center;line-height:1.6;">
+          לכל מקום שנרצה בכל דרך שנבחר 🐆
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// DETAIL
+// ============================================================
+function vDetail(vc = 'view-forward') {
+  const e = S.evaluations.find(x => x.id === S.detailId);
+  if (!e) return '<div class="main"><p style="padding:20px">לא נמצא</p></div>';
+  const scores = e.scores || {};
+  const a = parseFloat(e.avgScore || 0);
+  const color = TEAM_META[e.team]?.color || '#888';
+
+  return `
+    <div class="${vc}">
+      <div class="header" style="background:var(--primary);border-bottom:none;">
+        <button class="header-action" id="btn-back-detail" style="color:rgba(255,255,255,0.8);">‹ חזור</button>
+        <div style="display:flex;align-items:center;gap:7px;">
+          <img src="סמלים/saieret_nobg.png" style="height:26px;filter:brightness(0) invert(1);opacity:0.8;">
+          <div class="header-title" style="color:white;">פרטי הערכה</div>
+        </div>
+        <div style="width:64px"></div>
+      </div>
+      <div class="main">
+        <div class="card">
+          <div class="detail-header-card" style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px">
+            <div style="flex:1;min-width:0">
+              <div style="font-size:22px;font-weight:700;margin-bottom:5px;line-height:1.3">${e.exerciseName}</div>
+              <div style="font-size:13px;color:var(--text-secondary);margin-bottom:10px">${e.coachName} · ${fmtDate(e.date)}</div>
+              ${teamBadge(e.team)}
+              <span style="font-size:13px;color:var(--text-secondary);margin-right:6px">${e.terrainType}</span>
+            </div>
+            <div class="detail-score-badge ${scoreBgClass(a)}" style="color:${a >= 4 ? 'var(--success)' : a >= 3 ? 'var(--warning)' : 'var(--danger)'}">
+              ${a.toFixed(1)}
+            </div>
+          </div>
+        </div>
+
+        ${Object.keys(scores).length > 0 ? `
+          <div class="section-title">ציונים</div>
+          <div class="card">
+            ${Object.entries(scores).map(([k, v]) => `
+              <div class="criterion-row">
+                <div class="criterion-name">${k}</div>
+                <div class="stars-row">
+                  ${[1,2,3,4,5].map(n => `<span class="star ${n <= v ? 'on' : 'off'}" style="cursor:default;font-size:20px">★</span>`).join('')}
+                </div>
+              </div>`).join('')}
+          </div>` : ''}
+
+        ${(e.preserve1 || e.preserve2) ? `
+          <div class="section-title" style="display:flex;align-items:center;gap:6px;"><span style="color:var(--success)">${ICONS.check}</span> נקודות שימור</div>
+          <div class="card">
+            ${e.preserve1 ? `<div class="form-row" style="font-size:15px;line-height:1.6">${e.preserve1}</div>` : ''}
+            ${e.preserve2 ? `<div class="form-row" style="font-size:15px;line-height:1.6;border-top:1px solid var(--separator)">${e.preserve2}</div>` : ''}
+          </div>` : ''}
+
+        ${(e.improve1 || e.improve2) ? `
+          <div class="section-title" style="display:flex;align-items:center;gap:6px;"><span style="color:var(--accent)">${ICONS.arrowUp}</span> נקודות שיפור</div>
+          <div class="card">
+            ${e.improve1 ? `<div class="form-row" style="font-size:15px;line-height:1.6">${e.improve1}</div>` : ''}
+            ${e.improve2 ? `<div class="form-row" style="font-size:15px;line-height:1.6;border-top:1px solid var(--separator)">${e.improve2}</div>` : ''}
+          </div>` : ''}
+
+        ${e.notes ? `
+          <div class="section-title">התייחסות חופשית</div>
+          <div class="card">
+            <div class="form-row" style="font-size:15px;line-height:1.7;white-space:pre-wrap">${e.notes}</div>
+          </div>` : ''}
+
+        <div style="margin-top:24px">
+          <button class="btn btn-danger" id="btn-delete" style="display:flex;align-items:center;justify-content:center;gap:8px;">${ICONS.trash} מחק הערכה</button>
+        </div>
+      </div>
+    </div>`;
+}
+
+// ============================================================
+// ESCAPE
+// ============================================================
+function esc(s) {
+  return (s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ============================================================
+// HANDLERS
+// ============================================================
+function attachAll() {
+  // Nav
+  document.querySelectorAll('[data-nav]').forEach(el =>
+    el.addEventListener('click', () => { S.direction = 'fade'; S.view = el.dataset.nav; render(); })
+  );
+
+  // New eval
+  document.getElementById('btn-refresh')?.addEventListener('click', () => {
+    haptic(); loadData(false);
+  });
+
+  document.getElementById('btn-new')?.addEventListener('click', () => {
+    haptic(); S.direction = 'forward'; S.view = 'new-eval'; S.step = 1; S.form = freshForm(); render(); scrollTo(0,0);
+  });
+
+  // Back
+  document.getElementById('btn-back')?.addEventListener('click', () => {
+    haptic(6);
+    if (S.step > 1) { saveStepData(); S.direction = 'back'; S.step--; render(); scrollTo(0,0); }
+    else { S.direction = 'back'; S.view = 'dashboard'; render(); }
+  });
+  document.getElementById('btn-back-detail')?.addEventListener('click', () => {
+    haptic(6); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
+  });
+
+  // Team selector
+  document.querySelectorAll('[data-team]').forEach(el =>
+    el.addEventListener('click', () => { haptic(); saveStepData(); S.form.team = el.dataset.team; S.direction = 'fade'; render(); })
+  );
+
+  // Terrain selector
+  document.querySelectorAll('[data-terrain]').forEach(el =>
+    el.addEventListener('click', () => { haptic(); saveStepData(); S.form.terrainType = el.dataset.terrain; S.direction = 'fade'; render(); })
+  );
+
+  // Stars — click + hover preview
+  document.querySelectorAll('.star[data-criterion]').forEach(el => {
+    // click
+    el.addEventListener('click', () => {
+      haptic(8);
+      const crit = el.dataset.criterion;
+      const val  = parseInt(el.dataset.val);
+      S.form.scores[crit] = val;
+      const row = el.closest('[data-crit]');
+      if (row) {
+        row.querySelectorAll('.star').forEach(s => {
+          s.classList.remove('on','off','preview');
+          s.classList.add(parseInt(s.dataset.val) <= val ? 'on' : 'off');
+        });
+        // spring bounce on clicked star
+        el.style.transform = 'scale(1.4)';
+        setTimeout(() => { el.style.transform = ''; }, 180);
+      }
+    });
+    // hover preview
+    el.addEventListener('mouseenter', () => {
+      const val = parseInt(el.dataset.val);
+      const row = el.closest('[data-crit]');
+      const saved = S.form.scores[el.dataset.criterion] || 0;
+      if (row) row.querySelectorAll('.star').forEach(s => {
+        const sv = parseInt(s.dataset.val);
+        s.classList.remove('on','off','preview');
+        if (sv <= saved) s.classList.add('on');
+        else if (sv <= val) s.classList.add('preview');
+        else s.classList.add('off');
+      });
+    });
+    el.addEventListener('mouseleave', () => {
+      const row = el.closest('[data-crit]');
+      const saved = S.form.scores[el.dataset.criterion] || 0;
+      if (row) row.querySelectorAll('.star').forEach(s => {
+        s.classList.remove('on','off','preview');
+        s.classList.add(parseInt(s.dataset.val) <= saved ? 'on' : 'off');
+      });
+    });
+  });
+
+  // Next
+  document.getElementById('btn-next')?.addEventListener('click', () => {
+    if (!validateStep()) return;
+    haptic();
+    saveStepData();
+    S.direction = 'forward'; S.step++;
+    render(); scrollTo(0,0);
+  });
+
+  // Submit
+  document.getElementById('btn-submit')?.addEventListener('click', async () => {
+    S.form.preserve = [
+      document.getElementById('p0')?.value.trim() || '',
+      document.getElementById('p1')?.value.trim() || '',
+    ];
+    S.form.improve = [
+      document.getElementById('i0')?.value.trim() || '',
+      document.getElementById('i1')?.value.trim() || '',
+    ];
+    S.form.notes = document.getElementById('f-notes')?.value.trim() || '';
+    const a = avg(S.form.scores);
+    const ev = {
+      id: uid(),
+      timestamp: new Date().toISOString(),
+      coachName:    S.form.coachName,
+      exerciseName: S.form.exerciseName,
+      team:         S.form.team,
+      terrainType:  S.form.terrainType,
+      date:         S.form.date,
+      scores:       S.form.scores,
+      preserve1:    S.form.preserve[0],
+      preserve2:    S.form.preserve[1],
+      improve1:     S.form.improve[0],
+      improve2:     S.form.improve[1],
+      notes:        S.form.notes,
+      avgScore:     a.toFixed(2),
+    };
+    const btn = document.getElementById('btn-submit');
+    btn.disabled = true;
+    btn.innerHTML = '<div class="spinner"></div> שומר...';
+    haptic([20, 50, 20]);
+    await saveEval(ev);
+    S.successData = ev;
+    S.direction = 'forward'; S.view = 'success'; render();
+    setTimeout(() => { S.direction = 'fade'; S.view = 'dashboard'; render(); }, 2200);
+  });
+
+  // Detail click (from history / dashboard)
+  document.querySelectorAll('[data-detail]').forEach(el =>
+    el.addEventListener('click', () => {
+      S.prevView = S.view;
+      S.detailId = el.dataset.detail;
+      S.direction = 'forward'; S.view = 'detail';
+      render(); scrollTo(0,0);
+    })
+  );
+
+  // Team view back
+  document.getElementById('btn-back-team')?.addEventListener('click', () => {
+    haptic(6); S.direction = 'back'; S.view = 'dashboard'; render(); scrollTo(0,0);
+  });
+
+  // Exercise compare back
+  document.getElementById('btn-back-exercise')?.addEventListener('click', () => {
+    haptic(6); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
+  });
+
+  // Team name click (from leaderboard)
+  document.querySelectorAll('[data-team-filter]').forEach(el =>
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      haptic();
+      S.teamFilter = el.dataset.teamFilter;
+      S.prevView = S.view;
+      S.direction = 'forward'; S.view = 'team-view'; render(); scrollTo(0,0);
+    })
+  );
+
+  // Exercise click (from coach view)
+  document.querySelectorAll('[data-exercise]').forEach(el =>
+    el.addEventListener('click', () => {
+      S.exerciseFilter = el.dataset.exercise;
+      S.prevView = S.view;
+      S.direction = 'forward'; S.view = 'exercise-compare'; render(); scrollTo(0,0);
+    })
+  );
+
+  // Delete
+  document.getElementById('btn-delete')?.addEventListener('click', () => {
+    if (!confirm('למחוק הערכה זו לצמיתות?')) return;
+    S.evaluations = S.evaluations.filter(e => e.id !== S.detailId);
+    localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
+    toast('🗑️ ההערכה נמחקה');
+    S.direction = 'back'; S.view = S.prevView || 'dashboard'; render();
+  });
+}
+
+function saveStepData() {
+  if (S.step === 1) {
+    S.form.coachName    = document.getElementById('f-coach')?.value.trim() || '';
+    S.form.exerciseName = document.getElementById('f-exercise')?.value.trim() || '';
+    S.form.date         = document.getElementById('f-date')?.value || S.form.date;
+  }
+}
+
+function validateStep() {
+  if (S.step === 1) {
+    const coachEl = document.getElementById('f-coach');
+    const exEl    = document.getElementById('f-exercise');
+    const coach = coachEl?.value.trim();
+    const ex    = exEl?.value.trim();
+    if (!coach)             { shakeEl(coachEl); toast('⚠️ נא להזין שם חונך');   haptic([10,30,10]); return false; }
+    if (!ex)                { shakeEl(exEl);    toast('⚠️ נא להזין שם תרגיל'); haptic([10,30,10]); return false; }
+    if (!S.form.team)       { shakeEl(document.querySelector('.segment-wrap')); toast('⚠️ נא לבחור צוות');     haptic([10,30,10]); return false; }
+    if (!S.form.terrainType){ shakeEl(document.querySelector('.terrain-grid')); toast('⚠️ נא לבחור תא שטח');   haptic([10,30,10]); return false; }
+    S.form.coachName = coach; S.form.exerciseName = ex;
+    S.form.date = document.getElementById('f-date')?.value || S.form.date;
+  }
+  if (S.step === 2) {
+    const allCriteria = [
+      ...Object.values(UNIVERSAL).flat(),
+      ...(TERRAIN_CRITERIA[S.form.terrainType] || []),
+    ];
+    const missing = allCriteria.find(c => !(S.form.scores[c] > 0));
+    if (missing) {
+      const row = document.querySelector(`[data-crit="${missing}"]`);
+      shakeEl(row || document.querySelector('.criterion-row'));
+      toast('⚠️ נא לדרג את כל הקריטריונים');
+      haptic([10,30,10]);
+      return false;
+    }
+  }
+  return true;
+}
+
+// ============================================================
+// INIT
+// ============================================================
+loadData();
+</script>
+</body>
+</html>
