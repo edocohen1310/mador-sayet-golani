@@ -508,11 +508,15 @@ function todayStr() {
 // ============================================================
 async function loadData(silent = false) {
   const local = JSON.parse(localStorage.getItem('evals_v2') || '[]');
-  if (!silent) { S.evaluations = local; }
+  S.evaluations = local;
+  S.loading = false;
+  if (!silent) render();
 
-  if (!silent) { S.loading = true; render(); }
   try {
-    const res = await fetch(FIREBASE_URL + '/evaluations.json?t=' + Date.now());
+    const ctrl = new AbortController();
+    const tid = setTimeout(() => ctrl.abort(), 7000);
+    const res = await fetch(FIREBASE_URL + '/evaluations.json', { signal: ctrl.signal });
+    clearTimeout(tid);
     const data = await res.json();
     const rows = data ? Object.values(data) : [];
     S.evaluations = rows.map(r => ({
@@ -522,9 +526,8 @@ async function loadData(silent = false) {
     localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
   } catch (e) {
     console.warn('Firebase load failed:', e);
-    if (!silent) toast('⚠️ שגיאת טעינה: ' + e.message.slice(0, 60));
+    if (!silent) toast('⚠️ שגיאת טעינה מ-Firebase');
   }
-  S.loading = false;
   render();
 }
 
