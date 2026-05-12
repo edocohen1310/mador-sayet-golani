@@ -517,20 +517,21 @@ async function loadData(silent = false) {
     const tid = setTimeout(() => ctrl.abort(), 7000);
     const res = await fetch(FIREBASE_URL + '/evaluations.json', { signal: ctrl.signal });
     clearTimeout(tid);
+    if (!res.ok) throw new Error('Firebase HTTP ' + res.status);
     const data = await res.json();
-    const rows = data ? Object.values(data) : [];
+    const rows = (data && typeof data === 'object' && !data.error)
+      ? Object.values(data).filter(r => r && typeof r === 'object' && r.id)
+      : [];
     const remote = rows.map(r => ({
       ...r,
       scores: typeof r.scores === 'string' ? JSON.parse(r.scores || '{}') : (r.scores || {}),
     }));
-    // מיזוג: שמור כל הערכה שקיימת — מקומית או מרחוק
-    const merged = [...remote];
+    // מיזוג: remote + כל מקומי שאינו ב-remote
     const remoteIds = new Set(remote.map(r => r.id));
-    S.evaluations.forEach(loc => { if (!remoteIds.has(loc.id)) merged.push(loc); });
-    const changed = merged.length !== S.evaluations.length;
+    const merged = [...remote];
+    local.forEach(loc => { if (loc.id && !remoteIds.has(loc.id)) merged.push(loc); });
     S.evaluations = merged;
     localStorage.setItem('evals_v2', JSON.stringify(merged));
-    if (changed) render(); // רק אם יש נתונים חדשים
   } catch (e) {
     console.warn('Firebase load failed:', e);
     if (!silent) toast('⚠️ שגיאת טעינה מ-Firebase');
@@ -538,10 +539,6 @@ async function loadData(silent = false) {
   if (!silent) render();
 }
 
-// רענון אוטומטי כל 30 שניות
-setInterval(() => {
-  if (S.view === 'dashboard' || S.view === 'history') loadData(true);
-}, 30000);
 
 async function saveEval(ev) {
   // שמירה מקומית
