@@ -520,7 +520,7 @@ async function loadData(silent = false) {
     if (!res.ok) throw new Error('Firebase HTTP ' + res.status);
     const data = await res.json();
     const rows = (data && typeof data === 'object' && !data.error)
-      ? Object.values(data).filter(r => r && typeof r === 'object' && r.id)
+      ? Object.values(data).filter(r => r && typeof r === 'object' && r.id && r.team && r.exerciseName)
       : [];
     const remote = rows.map(r => ({
       ...r,
@@ -528,10 +528,23 @@ async function loadData(silent = false) {
     }));
     // מיזוג: remote + כל מקומי שאינו ב-remote
     const remoteIds = new Set(remote.map(r => r.id));
-    const merged = [...remote];
-    local.forEach(loc => { if (loc.id && !remoteIds.has(loc.id)) merged.push(loc); });
+    const localOnly = local.filter(l => l.id && l.team && l.exerciseName && !remoteIds.has(l.id));
+    const merged = [...remote, ...localOnly];
     S.evaluations = merged;
     localStorage.setItem('evals_v2', JSON.stringify(merged));
+
+    // סנכרון: העלה ל-Firebase כל הערכה מקומית שעוד לא שם
+    for (const ev of localOnly) {
+      try {
+        await fetch(FIREBASE_URL + '/evaluations.json', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(ev),
+        });
+      } catch (err) {
+        console.warn('Firebase sync failed for', ev.id, err);
+      }
+    }
   } catch (e) {
     console.warn('Firebase load failed:', e);
     if (!silent) toast('⚠️ שגיאת טעינה מ-Firebase');
