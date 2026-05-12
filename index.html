@@ -444,7 +444,7 @@ const UNIVERSAL = {
     'פקודות סדורות',
     'מיקום מפקד',
     'יציבות ובהירות לכוח',
-    'שיח מול מקבילים/רממ',
+    'שיח מול מקבילים רממ',
     'מיצוי אמלח',
   ],
   'הערכת הצוות': [
@@ -506,8 +506,23 @@ function todayStr() {
 // ============================================================
 // DATA
 // ============================================================
+function sanitizeEval(ev) {
+  if (!ev || typeof ev !== 'object') return ev;
+  const cleanScores = {};
+  if (ev.scores && typeof ev.scores === 'object') {
+    for (const k in ev.scores) {
+      const safe = String(k).replace(/[\.\$\#\[\]\/]/g, ' ').replace(/\s+/g, ' ').trim();
+      if (safe) cleanScores[safe] = ev.scores[k];
+    }
+  }
+  return { ...ev, scores: cleanScores };
+}
+
 async function loadData(silent = false) {
-  const local = JSON.parse(localStorage.getItem('evals_v2') || '[]');
+  let local = JSON.parse(localStorage.getItem('evals_v2') || '[]');
+  // ניקוי חד-פעמי של מפתחות אסורים בהערכות ישנות
+  local = local.map(sanitizeEval);
+  localStorage.setItem('evals_v2', JSON.stringify(local));
   S.evaluations = local;
   S.loading = false;
   if (!silent) render();
@@ -554,9 +569,10 @@ async function loadData(silent = false) {
 
 
 async function saveEval(ev) {
+  const clean = sanitizeEval(ev);
   // שמירה מקומית
   const arr = JSON.parse(localStorage.getItem('evals_v2') || '[]');
-  arr.push(ev);
+  arr.push(clean);
   localStorage.setItem('evals_v2', JSON.stringify(arr));
   S.evaluations = arr;
 
@@ -565,7 +581,7 @@ async function saveEval(ev) {
     await fetch(FIREBASE_URL + '/evaluations.json', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(ev),
+      body: JSON.stringify(clean),
     });
   } catch (e) {
     console.warn('Firebase save failed:', e);
