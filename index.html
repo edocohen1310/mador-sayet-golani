@@ -718,8 +718,6 @@ function vDashboard(vc = 'view-fade') {
   const recent = [...S.evaluations]
     .sort((a, b) => new Date(b.timestamp || b.date) - new Date(a.timestamp || a.date))
     .slice(0, 5);
-  const needsConfig = SCRIPT_URL === 'YOUR_SCRIPT_URL_HERE';
-
   return `
     <div class="${vc}">
       <div class="header" style="background:var(--primary);border-bottom:none;padding:12px 16px 10px;flex-direction:column;align-items:stretch;gap:10px;min-height:unset;">
@@ -738,13 +736,6 @@ function vDashboard(vc = 'view-fade') {
         </div>
       </div>
       <div class="main">
-        ${needsConfig ? `
-          <div class="notice notice-warning si" style="display:flex;gap:10px;align-items:flex-start;">
-            <span style="flex-shrink:0;margin-top:1px">${ICONS.warning}</span>
-            <span><strong>הגדרה נדרשת:</strong> החלף את <code>YOUR_SCRIPT_URL_HERE</code>
-            ב-URL של Google Apps Script לסנכרון בין מכשירים.
-            כרגע הנתונים נשמרים <strong>רק במכשיר הזה</strong>.</span>
-          </div>` : ''}
 
         <div class="section-title">דירוג צוותים</div>
         <div class="card">
