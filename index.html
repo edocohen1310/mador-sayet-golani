@@ -519,16 +519,23 @@ async function loadData(silent = false) {
     clearTimeout(tid);
     const data = await res.json();
     const rows = data ? Object.values(data) : [];
-    S.evaluations = rows.map(r => ({
+    const remote = rows.map(r => ({
       ...r,
       scores: typeof r.scores === 'string' ? JSON.parse(r.scores || '{}') : (r.scores || {}),
     }));
-    localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
+    // מיזוג: שמור כל הערכה שקיימת — מקומית או מרחוק
+    const merged = [...remote];
+    const remoteIds = new Set(remote.map(r => r.id));
+    S.evaluations.forEach(loc => { if (!remoteIds.has(loc.id)) merged.push(loc); });
+    const changed = merged.length !== S.evaluations.length;
+    S.evaluations = merged;
+    localStorage.setItem('evals_v2', JSON.stringify(merged));
+    if (changed) render(); // רק אם יש נתונים חדשים
   } catch (e) {
     console.warn('Firebase load failed:', e);
     if (!silent) toast('⚠️ שגיאת טעינה מ-Firebase');
   }
-  render();
+  if (!silent) render();
 }
 
 // רענון אוטומטי כל 30 שניות
