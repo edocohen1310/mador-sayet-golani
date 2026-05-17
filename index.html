@@ -716,8 +716,21 @@ function setupRipples() {
   });
 }
 
-function haptic(ms = 10) {
-  try { navigator.vibrate?.(ms); } catch(_) {}
+const HAPTIC = {
+  light:   [5],
+  medium:  [8],
+  back:    [4],
+  star:    [3],
+  success: [8, 55, 12],
+  warning: [8, 18, 8],
+};
+function haptic(type = 'medium') {
+  try {
+    const p = typeof type === 'number' ? [type]
+            : Array.isArray(type) ? type
+            : HAPTIC[type] ?? [8];
+    navigator.vibrate?.(p);
+  } catch(_) {}
 }
 
 function shakeEl(el) {
@@ -857,6 +870,36 @@ function vNewEval(vc = 'view-forward') {
     </div>`;
 }
 
+function s1ExerciseHtml() {
+  const f = S.form;
+  if (f.terrainType && EXERCISE_NAMES[f.terrainType]) {
+    return `<div class="section-title">שם התרגיל</div><div class="card"><div class="form-row">
+      <select class="form-input" id="f-exercise" style="cursor:pointer;">
+        <option value="">— בחר תרגיל —</option>
+        ${EXERCISE_NAMES[f.terrainType].map(n => `<option value="${esc(n)}" ${f.exerciseName === n ? 'selected' : ''}>${n}</option>`).join('')}
+      </select></div></div>`;
+  }
+  return `<div class="section-title">שם התרגיל</div><div class="card"><div class="form-row">
+    <select class="form-input" id="f-exercise" disabled style="opacity:0.45;cursor:not-allowed;">
+      <option>בחר תחילה תא שטח</option>
+    </select></div></div>`;
+}
+
+function s1RecentHtml() {
+  const f = S.form;
+  if (!f.team) return '';
+  const recent = recentForTeam(f.team);
+  return recent.length > 0
+    ? `<div class="section-title">תרגילים אחרונים — ${f.team}</div><div class="card">
+        ${recent.map(e => `<div class="mini-row" data-detail="${e.id}" style="cursor:pointer">
+          <div><div class="mini-title">${e.exerciseName}</div>
+          <div class="mini-sub">${e.terrainType} · ${fmtDate(e.date)}</div></div>
+          <span class="mini-score ${scoreClass(e.avgScore)}">${parseFloat(e.avgScore||0).toFixed(1)}</span>
+        </div>`).join('')}</div>`
+    : `<div class="section-title">תרגילים אחרונים — ${f.team}</div><div class="card">
+        <div class="form-row" style="color:var(--text-secondary);text-align:center;font-size:14px">אין תרגילים קודמים לצוות ${f.team}</div></div>`;
+}
+
 function vStep1() {
   const f = S.form;
   const recent = f.team ? recentForTeam(f.team) : [];
@@ -890,38 +933,8 @@ function vStep1() {
         </div>`).join('')}
     </div>
 
-    <div class="section-title">שם התרגיל</div>
-    <div class="card">
-      <div class="form-row">
-        ${f.terrainType && EXERCISE_NAMES[f.terrainType] ? `
-          <select class="form-input" id="f-exercise" style="cursor:pointer;">
-            <option value="">— בחר תרגיל —</option>
-            ${EXERCISE_NAMES[f.terrainType].map(n =>
-              `<option value="${esc(n)}" ${f.exerciseName === n ? 'selected' : ''}>${n}</option>`
-            ).join('')}
-          </select>` : `
-          <select class="form-input" id="f-exercise" disabled style="opacity:0.45;cursor:not-allowed;">
-            <option>בחר תחילה תא שטח</option>
-          </select>`}
-      </div>
-    </div>
-
-    ${f.team && recent.length > 0 ? `
-      <div class="section-title">תרגילים אחרונים — ${f.team}</div>
-      <div class="card">
-        ${recent.map(e => `
-          <div class="mini-row" data-detail="${e.id}" style="cursor:pointer">
-            <div>
-              <div class="mini-title">${e.exerciseName}</div>
-              <div class="mini-sub">${e.terrainType} · ${fmtDate(e.date)}</div>
-            </div>
-            <span class="mini-score ${scoreClass(e.avgScore)}">${parseFloat(e.avgScore||0).toFixed(1)}</span>
-          </div>`).join('')}
-      </div>` : f.team ? `
-      <div class="section-title">תרגילים אחרונים — ${f.team}</div>
-      <div class="card">
-        <div class="form-row" style="color:var(--text-secondary);text-align:center;font-size:14px">אין תרגילים קודמים לצוות ${f.team}</div>
-      </div>` : ''}
+    <div id="s1-ex-wrap">${s1ExerciseHtml()}</div>
+    <div id="s1-recent-wrap">${s1RecentHtml()}</div>
   `;
 }
 
@@ -1308,6 +1321,15 @@ function esc(s) {
 // ============================================================
 // HANDLERS
 // ============================================================
+function attachDetailListeners() {
+  document.querySelectorAll('[data-detail]').forEach(el =>
+    el.addEventListener('click', () => {
+      S.prevView = S.view; S.detailId = el.dataset.detail;
+      S.direction = 'forward'; S.view = 'detail'; render(); scrollTo(0,0);
+    })
+  );
+}
+
 function attachAll() {
   // Nav
   document.querySelectorAll('[data-nav]').forEach(el =>
@@ -1316,11 +1338,11 @@ function attachAll() {
 
   // New eval
   document.getElementById('btn-refresh')?.addEventListener('click', () => {
-    haptic(); loadData(false);
+    haptic('medium'); loadData(false);
   });
 
   document.getElementById('btn-new')?.addEventListener('click', () => {
-    haptic(); S.direction = 'forward'; S.view = 'new-eval'; S.step = 1; S.form = freshForm(); render(); scrollTo(0,0);
+    haptic('medium'); S.direction = 'forward'; S.view = 'new-eval'; S.step = 1; S.form = freshForm(); render(); scrollTo(0,0);
   });
 
   // Back
@@ -1330,24 +1352,37 @@ function attachAll() {
     else { S.direction = 'back'; S.view = 'dashboard'; render(); }
   });
   document.getElementById('btn-back-detail')?.addEventListener('click', () => {
-    haptic(6); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
+    haptic('back'); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
   });
 
   // Team selector
   document.querySelectorAll('[data-team]').forEach(el =>
-    el.addEventListener('click', () => { haptic(); saveStepData(); S.form.team = el.dataset.team; S.direction = 'fade'; render(); })
+    el.addEventListener('click', () => {
+      haptic('light'); saveStepData();
+      S.form.team = el.dataset.team;
+      document.querySelectorAll('[data-team]').forEach(b => b.classList.toggle('active', b.dataset.team === S.form.team));
+      const rw = document.getElementById('s1-recent-wrap');
+      if (rw) { rw.innerHTML = s1RecentHtml(); attachDetailListeners(); }
+    })
   );
 
   // Terrain selector
   document.querySelectorAll('[data-terrain]').forEach(el =>
-    el.addEventListener('click', () => { haptic(); saveStepData(); S.form.terrainType = el.dataset.terrain; S.direction = 'fade'; render(); })
+    el.addEventListener('click', () => {
+      haptic('light'); saveStepData();
+      S.form.terrainType = el.dataset.terrain;
+      S.form.exerciseName = '';
+      document.querySelectorAll('[data-terrain]').forEach(t => t.classList.toggle('selected', t.dataset.terrain === S.form.terrainType));
+      const ew = document.getElementById('s1-ex-wrap');
+      if (ew) ew.innerHTML = s1ExerciseHtml();
+    })
   );
 
   // Stars — click + hover preview
   document.querySelectorAll('.star[data-criterion]').forEach(el => {
     // click
     el.addEventListener('click', () => {
-      haptic(8);
+      haptic('star');
       const crit = el.dataset.criterion;
       const val  = parseInt(el.dataset.val);
       S.form.scores[crit] = val;
@@ -1388,7 +1423,7 @@ function attachAll() {
   // Next
   document.getElementById('btn-next')?.addEventListener('click', () => {
     if (!validateStep()) return;
-    haptic();
+    haptic('medium');
     saveStepData();
     S.direction = 'forward'; S.step++;
     render(); scrollTo(0,0);
@@ -1425,7 +1460,7 @@ function attachAll() {
     const btn = document.getElementById('btn-submit');
     btn.disabled = true;
     btn.innerHTML = '<div class="spinner"></div> שומר...';
-    haptic([20, 50, 20]);
+    haptic('success');
     await saveEval(ev);
     S.successData = ev;
     S.direction = 'forward'; S.view = 'success'; render();
@@ -1444,19 +1479,19 @@ function attachAll() {
 
   // Team view back
   document.getElementById('btn-back-team')?.addEventListener('click', () => {
-    haptic(6); S.direction = 'back'; S.view = 'dashboard'; render(); scrollTo(0,0);
+    haptic('back'); S.direction = 'back'; S.view = 'dashboard'; render(); scrollTo(0,0);
   });
 
   // Exercise compare back
   document.getElementById('btn-back-exercise')?.addEventListener('click', () => {
-    haptic(6); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
+    haptic('back'); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
   });
 
   // Team name click (from leaderboard)
   document.querySelectorAll('[data-team-filter]').forEach(el =>
     el.addEventListener('click', e => {
       e.stopPropagation();
-      haptic();
+      haptic('light');
       S.teamFilter = el.dataset.teamFilter;
       S.prevView = S.view;
       S.direction = 'forward'; S.view = 'team-view'; render(); scrollTo(0,0);
@@ -1513,10 +1548,10 @@ function validateStep() {
     const exEl    = document.getElementById('f-exercise');
     const coach = coachEl?.value.trim();
     const ex    = exEl?.value.trim();
-    if (!coach)             { shakeEl(coachEl); toast('⚠️ נא להזין שם חונך');   haptic([10,30,10]); return false; }
-    if (!ex)                { shakeEl(exEl);    toast('⚠️ נא להזין שם תרגיל'); haptic([10,30,10]); return false; }
-    if (!S.form.team)       { shakeEl(document.querySelector('.segment-wrap')); toast('⚠️ נא לבחור צוות');     haptic([10,30,10]); return false; }
-    if (!S.form.terrainType){ shakeEl(document.querySelector('.terrain-grid')); toast('⚠️ נא לבחור תא שטח');   haptic([10,30,10]); return false; }
+    if (!coach)             { shakeEl(coachEl); toast('⚠️ נא להזין שם חונך');   haptic('warning'); return false; }
+    if (!ex)                { shakeEl(exEl);    toast('⚠️ נא להזין שם תרגיל'); haptic('warning'); return false; }
+    if (!S.form.team)       { shakeEl(document.querySelector('.segment-wrap')); toast('⚠️ נא לבחור צוות');     haptic('warning'); return false; }
+    if (!S.form.terrainType){ shakeEl(document.querySelector('.terrain-grid')); toast('⚠️ נא לבחור תא שטח');   haptic('warning'); return false; }
     S.form.coachName = coach; S.form.exerciseName = ex;
     S.form.date = document.getElementById('f-date')?.value || S.form.date;
   }
@@ -1530,7 +1565,7 @@ function validateStep() {
       const row = document.querySelector(`[data-crit="${missing}"]`);
       shakeEl(row || document.querySelector('.criterion-row'));
       toast('⚠️ נא לדרג את כל הקריטריונים');
-      haptic([10,30,10]);
+      haptic('warning');
       return false;
     }
   }
