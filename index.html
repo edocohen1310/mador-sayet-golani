@@ -462,10 +462,10 @@ const TERRAIN_CRITERIA = {
 };
 
 const EXERCISE_NAMES = {
-  'בנוי':   ['עמוקה','קרן נפתלי','מערות יוסי','אזור תעשייה דלתון','מנחת דלתון','ג\'יש','ספסופה','צפת','נוף כנרת','אליפלט','חצור','בונקר אודם','מסעדה','עין קניא','תת קרקע'],
+  'בנוי':   ['קרן נפתלי','מערות יוסי','אזור תעשייה דלתון','מנחת דלתון','ג\'יש','ספסופה','צפת','נוף כנרת','אליפלט','חצור','בונקר אודם','מסעדה','עין קניא','תת קרקע','מיני רבקו','דו מיני','המסגד','מאלא 1','מאלא 2','מאלא 3'],
   'סבך':   ['שס"מ צבעון','שס"מ בר יוחאי','שס"מ מסעדה'],
   'מטעים': ['רחאניה'],
-  'ארן':   ['דישון','צבעון'],
+  'ארן':   ['דישון','צבעון','ארן מאלא'],
 };
 
 // ============================================================
@@ -1215,8 +1215,8 @@ function vSuccess(vc = 'view-fade') {
         <div class="success-circle" style="background:rgba(30,81,40,0.12);color:var(--primary)">${ICONS.check}</div>
         <div class="success-title">ההערכה נשמרה!</div>
         <div class="success-sub">${d.exerciseName || ''} · ${d.team || ''}</div>
-        <div class="success-score ${scoreClass(a)}">${a.toFixed(1)}</div>
-        <div class="success-score-label">ציון ממוצע מתוך 5</div>
+        <div class="success-score ${scoreClass(a)}">${(a * 20).toFixed(1)}</div>
+        <div class="success-score-label">ציון מתוך 100</div>
         <div style="margin-top:18px;font-size:15px;font-weight:600;color:var(--primary);text-align:center;line-height:1.6;">
           לכל מקום שנרצה בכל דרך שנבחר 🐆
         </div>
