@@ -101,6 +101,39 @@
       letter-spacing: 0.6px;
       margin: 22px 0 8px 6px;
     }
+    /* ======== COLLAPSIBLE CRITERION SECTIONS ======== */
+    .crit-section { margin-bottom: 2px; }
+    .section-collapse-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 16px 6px 10px; cursor: pointer;
+      user-select: none; -webkit-user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .section-toggle-icon {
+      font-size: 13px; color: var(--text-secondary);
+      transition: transform 0.22s cubic-bezier(0.2,0,0,1);
+      display: inline-block; line-height: 1;
+    }
+    .crit-section.collapsed .section-toggle-icon { transform: rotate(-90deg); }
+    .section-title-text {
+      font-size: 12px; font-weight: 700; color: var(--text-secondary);
+      text-transform: uppercase; letter-spacing: 0.6px; flex: 1;
+    }
+    .section-progress-badge {
+      font-size: 12px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+      background: var(--bg); color: var(--text-secondary);
+      transition: background 0.25s, color 0.25s, transform 0.2s;
+      min-width: 32px; text-align: center;
+    }
+    .section-collapse-header.done .section-progress-badge {
+      background: var(--success); color: white; transform: scale(1.08);
+    }
+    .section-body {
+      overflow: hidden;
+      transition: max-height 0.3s cubic-bezier(0.2,0,0,1), opacity 0.22s ease;
+      max-height: 2000px; opacity: 1;
+    }
+    .crit-section.collapsed .section-body { max-height: 0 !important; opacity: 0; }
 
     /* ======== BUTTONS ======== */
     .btn {
@@ -164,6 +197,7 @@
       color: var(--text-secondary); transition: all 0.18s; -webkit-tap-highlight-color: transparent;
     }
     .seg-btn.active { background: white; color: var(--text); font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    .seg-btn:active { background: rgba(0,0,0,0.08); transform: scale(0.97); }
 
     /* ======== TERRAIN GRID ======== */
     .terrain-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
@@ -198,7 +232,7 @@
 
     /* ======== PROGRESS BAR ======== */
     .progress-track { height: 3px; background: var(--separator); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
-    .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.35s ease; }
+    .progress-fill { height: 100%; background: var(--primary); border-radius: 2px; transition: width 0.35s cubic-bezier(0.2,0,0,1); }
     .step-label { font-size: 12px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
 
     /* ======== LEADERBOARD ======== */
@@ -263,6 +297,24 @@
       z-index: 9999; white-space: nowrap; pointer-events: none;
     }
     .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ======== DELETE DIALOG ======== */
+    .delete-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 10000;
+      display: flex; align-items: flex-end; justify-content: center;
+      padding-bottom: env(safe-area-inset-bottom);
+      animation: fadeIn 0.2s ease;
+    }
+    .delete-sheet {
+      background: white; border-radius: 18px 18px 0 0; padding: 24px 20px 16px;
+      width: 100%; max-width: 480px;
+      animation: slideUpSheet 0.28s cubic-bezier(0.05,0.7,0.1,1);
+    }
+    .delete-sheet-title { font-size: 17px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+    .delete-sheet-sub { font-size: 14px; color: var(--text-secondary); text-align: center; margin-bottom: 20px; }
+    .delete-sheet-btns { display: flex; flex-direction: column; gap: 10px; }
+    @keyframes slideUpSheet { from { transform: translateY(100%); } to { transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     /* ======== BOTTOM NAV ======== */
     .bottom-nav {
@@ -356,7 +408,7 @@
     .ripple {
       position:absolute; border-radius:50%; pointer-events:none;
       background:rgba(255,255,255,0.38); transform:scale(0);
-      animation: rippleOut 0.55s linear forwards;
+      animation: rippleOut 0.3s cubic-bezier(0.2,0,0,1) forwards;
     }
     @keyframes rippleOut { to { transform:scale(4); opacity:0; } }
 
@@ -717,12 +769,12 @@ function setupRipples() {
 }
 
 const HAPTIC = {
-  light:   [5],
-  medium:  [8],
-  back:    [4],
-  star:    [3],
-  success: [8, 55, 12],
-  warning: [8, 18, 8],
+  light:   [8],
+  medium:  [10],
+  back:    [6],
+  star:    [10],
+  success: [8, 100, 12],
+  warning: [8, 40, 8],
 };
 function haptic(type = 'medium') {
   try {
@@ -941,20 +993,50 @@ function vStep1() {
 function vStep2() {
   const f = S.form;
   const terrainCriteria = TERRAIN_CRITERIA[f.terrainType] || [];
+  const allSections = [
+    ...Object.entries(UNIVERSAL),
+    ...(terrainCriteria.length ? [[`ספציפי — ${f.terrainType}`, terrainCriteria]] : [])
+  ];
+  return allSections.map(([title, criteria], i) => {
+    const secId = 'sec' + i;
+    const scored = criteria.filter(c => (f.scores[c] || 0) > 0).length;
+    const total = criteria.length;
+    const done = scored === total && total > 0;
+    return `
+      <div class="crit-section" data-section-id="${secId}">
+        <div class="section-collapse-header ${done ? 'done' : ''}" data-toggle="${secId}">
+          <span class="section-toggle-icon">▾</span>
+          <span class="section-title-text">${title}</span>
+          <span class="section-progress-badge" id="prog-${secId}">${done ? '✓' : scored + '/' + total}</span>
+        </div>
+        <div class="section-body" id="body-${secId}">
+          <div class="card">${criteria.map(c => criterionRow(c, f.scores[c] || 0)).join('')}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
 
-  let html = '';
-  Object.entries(UNIVERSAL).forEach(([section, criteria]) => {
-    html += `<div class="section-title">${section}</div><div class="card">`;
-    criteria.forEach(c => html += criterionRow(c, f.scores[c] || 0));
-    html += '</div>';
+function updateSectionProgress() {
+  document.querySelectorAll('.crit-section').forEach(sec => {
+    const secId = sec.dataset.sectionId;
+    const body = document.getElementById('body-' + secId);
+    if (!body) return;
+    const rows = body.querySelectorAll('.stars-row');
+    const total = rows.length;
+    const scored = [...rows].filter(row => (S.form.scores[row.dataset.crit] || 0) > 0).length;
+    const badge = document.getElementById('prog-' + secId);
+    const header = sec.querySelector('.section-collapse-header');
+    if (scored === total && total > 0) {
+      if (badge) badge.textContent = '✓';
+      if (header) header.classList.add('done');
+      if (!sec.classList.contains('collapsed')) {
+        setTimeout(() => { sec.classList.add('collapsed'); haptic('light'); }, 500);
+      }
+    } else {
+      if (badge) badge.textContent = scored + '/' + total;
+      if (header) header.classList.remove('done');
+    }
   });
-
-  if (terrainCriteria.length) {
-    html += `<div class="section-title">ספציפי לתא שטח — ${f.terrainType}</div><div class="card">`;
-    terrainCriteria.forEach(c => html += criterionRow(c, f.scores[c] || 0));
-    html += '</div>';
-  }
-  return html;
 }
 
 function criterionRow(c, score) {
@@ -1233,6 +1315,9 @@ function vSuccess(vc = 'view-fade') {
         <div style="margin-top:18px;font-size:15px;font-weight:600;color:var(--primary);text-align:center;line-height:1.6;">
           לכל מקום שנרצה בכל דרך שנבחר 🐆
         </div>
+        <button id="btn-success-continue" class="btn btn-primary" style="margin-top:22px;animation:viewFade 0.4s 0.9s both;">
+          ← לדשבורד
+        </button>
       </div>
     </div>`;
 }
@@ -1351,6 +1436,20 @@ function attachAll() {
     if (S.step > 1) { saveStepData(); S.direction = 'back'; S.step--; render(); scrollTo(0,0); }
     else { S.direction = 'back'; S.view = 'dashboard'; render(); }
   });
+  // Collapsible criterion sections
+  document.querySelectorAll('[data-toggle]').forEach(el =>
+    el.addEventListener('click', () => {
+      haptic('light');
+      const sec = document.querySelector(`[data-section-id="${el.dataset.toggle}"]`);
+      if (sec) sec.classList.toggle('collapsed');
+    })
+  );
+
+  document.getElementById('btn-success-continue')?.addEventListener('click', () => {
+    clearTimeout(S._successTimer);
+    haptic('medium'); S.direction = 'fade'; S.view = 'dashboard'; render();
+  });
+
   document.getElementById('btn-back-detail')?.addEventListener('click', () => {
     haptic('back'); S.direction = 'back'; S.view = S.prevView || 'dashboard'; render(); scrollTo(0,0);
   });
@@ -1396,6 +1495,7 @@ function attachAll() {
         el.style.transform = 'scale(1.4)';
         setTimeout(() => { el.style.transform = ''; }, 180);
       }
+      updateSectionProgress();
     });
     // hover preview
     el.addEventListener('mouseenter', () => {
@@ -1464,7 +1564,7 @@ function attachAll() {
     await saveEval(ev);
     S.successData = ev;
     S.direction = 'forward'; S.view = 'success'; render();
-    setTimeout(() => { S.direction = 'fade'; S.view = 'dashboard'; render(); }, 2200);
+    S._successTimer = setTimeout(() => { S.direction = 'fade'; S.view = 'dashboard'; render(); }, 4000);
   });
 
   // Detail click (from history / dashboard)
@@ -1508,29 +1608,44 @@ function attachAll() {
   );
 
   // Delete
-  document.getElementById('btn-delete')?.addEventListener('click', async () => {
-    if (!confirm('למחוק הערכה זו לצמיתות?')) return;
-    const idToDelete = S.detailId;
-    S.evaluations = S.evaluations.filter(e => e.id !== idToDelete);
-    localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
-    toast('🗑️ ההערכה נמחקה');
-    S.direction = 'back'; S.view = S.prevView || 'dashboard'; render();
+  document.getElementById('btn-delete')?.addEventListener('click', () => {
+    haptic('warning');
+    const evalName = S.evaluations.find(e => e.id === S.detailId)?.exerciseName || 'הערכה זו';
+    const overlay = document.createElement('div');
+    overlay.className = 'delete-overlay';
+    overlay.innerHTML = `
+      <div class="delete-sheet">
+        <div class="delete-sheet-title">מחיקת הערכה</div>
+        <div class="delete-sheet-sub">${evalName} — פעולה זו לא ניתנת לביטול</div>
+        <div class="delete-sheet-btns">
+          <button id="btn-delete-confirm" class="btn btn-danger" style="font-size:16px;">🗑️ מחק לצמיתות</button>
+          <button id="btn-delete-cancel" class="btn" style="background:var(--bg);font-size:16px;">ביטול</button>
+        </div>
+      </div>`;
+    document.body.appendChild(overlay);
 
-    // מחיקה גם מ-Firebase: מאתר את המפתח האוטומטי לפי id
-    try {
-      const res = await fetch(FIREBASE_URL + '/evaluations.json');
-      if (res.ok) {
-        const data = await res.json();
-        if (data && typeof data === 'object') {
-          const keysToDelete = Object.keys(data).filter(k => data[k] && data[k].id === idToDelete);
-          for (const k of keysToDelete) {
-            await fetch(FIREBASE_URL + '/evaluations/' + k + '.json', { method: 'DELETE' });
+    overlay.querySelector('#btn-delete-cancel').addEventListener('click', () => { haptic('back'); overlay.remove(); });
+    overlay.addEventListener('click', e => { if (e.target === overlay) { haptic('back'); overlay.remove(); } });
+
+    overlay.querySelector('#btn-delete-confirm').addEventListener('click', async () => {
+      haptic('warning');
+      overlay.remove();
+      const idToDelete = S.detailId;
+      S.evaluations = S.evaluations.filter(e => e.id !== idToDelete);
+      localStorage.setItem('evals_v2', JSON.stringify(S.evaluations));
+      toast('🗑️ ההערכה נמחקה');
+      S.direction = 'back'; S.view = S.prevView || 'dashboard'; render();
+      try {
+        const res = await fetch(FIREBASE_URL + '/evaluations.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (data && typeof data === 'object') {
+            const keys = Object.keys(data).filter(k => data[k] && data[k].id === idToDelete);
+            for (const k of keys) await fetch(FIREBASE_URL + '/evaluations/' + k + '.json', { method: 'DELETE' });
           }
         }
-      }
-    } catch (e) {
-      console.warn('Firebase delete failed:', e);
-    }
+      } catch (e) { console.warn('Firebase delete failed:', e); }
+    });
   });
 }
 
