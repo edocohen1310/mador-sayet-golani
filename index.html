@@ -221,14 +221,29 @@
     }
     .criterion-row + .criterion-row { border-top: 1px solid var(--separator); }
     .criterion-name { font-size: 14px; color: var(--text); flex: 1; line-height: 1.35; }
-    .stars-row { display: flex; gap: 4px; direction: ltr; flex-shrink: 0; }
+    .stars-row { display: flex; gap: 0; direction: ltr; flex-shrink: 0; align-items: center; }
     .star {
-      font-size: 26px; cursor: pointer; transition: transform 0.1s;
+      font-size: 26px; cursor: pointer;
       -webkit-tap-highlight-color: transparent; line-height: 1; user-select: none;
+      padding: 9px 5px; margin: -9px -1px;
+      transition: transform 0.18s cubic-bezier(0.2,0,0,1);
     }
-    .star:active { transform: scale(0.82); }
-    .star.on { color: var(--star); }
+    .star.on  { color: var(--star); }
     .star.off { color: #D1D1D6; }
+    .star-label {
+      font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      min-width: 26px; text-align: center; margin-right: 4px;
+      opacity: 0; transition: opacity 0.2s;
+    }
+    .star-label.visible { opacity: 1; }
+    @keyframes starPop {
+      0%   { transform: scale(1);    }
+      35%  { transform: scale(1.5);  }
+      65%  { transform: scale(0.88); }
+      82%  { transform: scale(1.1);  }
+      100% { transform: scale(1);    }
+    }
+    .star.popping { animation: starPop 0.28s cubic-bezier(0.34,1.56,0.64,1) forwards; }
 
     /* ======== PROGRESS BAR ======== */
     .progress-track { height: 3px; background: var(--separator); border-radius: 2px; overflow: hidden; margin-bottom: 6px; }
@@ -424,14 +439,25 @@
       animation: checkBounce 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
     }
     .success-circle svg { width:42px; height:42px; stroke-width:2.5; }
-    @keyframes checkBounce { from{transform:scale(0);opacity:0} to{transform:scale(1);opacity:1} }
+    @keyframes checkBounce {
+      0%   { transform:scale(0);    opacity:0; }
+      55%  { transform:scale(1.18); opacity:1; }
+      75%  { transform:scale(0.94); }
+      88%  { transform:scale(1.06); }
+      100% { transform:scale(1);    }
+    }
     .success-title { font-size:26px; font-weight:700; margin-bottom:8px; animation:viewFade 0.4s 0.3s both; }
     .success-sub   { font-size:15px; color:var(--text-secondary); animation:viewFade 0.4s 0.45s both; }
     .success-score { font-size:56px; font-weight:800; margin:20px 0 4px; animation:checkBounce 0.5s cubic-bezier(0.34,1.56,0.64,1) 0.5s both; }
     .success-score-label { font-size:13px; color:var(--text-secondary); animation:viewFade 0.4s 0.7s both; }
+    .success-progress {
+      position:fixed; bottom:0; left:0; right:0; height:3px;
+      background:var(--primary); width:0%;
+      transition: width 4s linear;
+    }
 
     /* ======== STAR HOVER ======== */
-    .star.preview { color: var(--star); opacity: 0.55; }
+    .star.preview { color: var(--star); opacity: 0.5; transition: opacity 0.08s ease; }
 
     /* ======== LEADERBOARD BAR (animated via JS) ======== */
     .bar-fill { transition: width 0.75s cubic-bezier(0.34,1.56,0.64,1); }
@@ -727,6 +753,21 @@ function render() {
   animateBars();
   countUpScores();
   setupRipples();
+  if (S.view === 'success') {
+    const target = parseFloat((S.successData || {}).avgScore || 0) * 20;
+    setTimeout(() => {
+      const el = document.getElementById('success-score-num');
+      if (!el) return;
+      const dur = 1200, start = performance.now();
+      const tick = now => {
+        const p = Math.min((now - start) / dur, 1);
+        const ease = 1 - Math.pow(1 - p, 3);
+        el.textContent = (target * ease).toFixed(1);
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+    }, 500);
+  }
 }
 
 // animate leaderboard bars: start at 0 → target via CSS transition
@@ -1044,10 +1085,14 @@ function criterionRow(c, score) {
   const stars = [1,2,3,4,5].map(n =>
     `<span class="star ${n <= score ? 'on' : 'off'}" data-val="${n}" data-criterion="${ec}">★</span>`
   ).join('');
+  const lbl = score > 0 ? score + '/5' : '';
   return `
     <div class="criterion-row">
       <div class="criterion-name">${c}</div>
-      <div class="stars-row" data-crit="${ec}">${stars}</div>
+      <div style="display:flex;align-items:center;gap:2px;flex-shrink:0">
+        <span class="star-label ${score > 0 ? 'visible' : ''}" id="lbl-${ec}">${lbl}</span>
+        <div class="stars-row" data-crit="${ec}">${stars}</div>
+      </div>
     </div>`;
 }
 
@@ -1300,25 +1345,27 @@ function vHistory(vc = 'view-fade') {
 function vSuccess(vc = 'view-fade') {
   const d = S.successData || {};
   const a = parseFloat(d.avgScore || 0);
+  const bgTint = a >= 4 ? 'rgba(30,81,40,0.04)' : a >= 3 ? 'rgba(184,148,30,0.05)' : 'rgba(224,62,62,0.04)';
   return `
     <div class="${vc}">
-      <div class="success-wrap">
-        <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:8px;">
+      <div class="success-wrap" style="background:${bgTint};border-radius:24px;">
+        <div style="display:flex;align-items:center;justify-content:center;gap:24px;margin-bottom:8px;animation:viewFade 0.4s 0s both;">
           <img src="סמלים/saieret_nobg.png" style="height:56px;opacity:0.85;">
           <img src="סמלים/tree_nobg.png" style="height:56px;opacity:0.85;">
         </div>
         <div class="success-circle" style="background:rgba(30,81,40,0.12);color:var(--primary)">${ICONS.check}</div>
         <div class="success-title">ההערכה נשמרה!</div>
         <div class="success-sub">${d.exerciseName || ''} · ${d.team || ''}</div>
-        <div class="success-score ${scoreClass(a)}">${(a * 20).toFixed(1)}</div>
+        <div class="success-score ${scoreClass(a)}"><span id="success-score-num">0</span></div>
         <div class="success-score-label">ציון מתוך 100</div>
-        <div style="margin-top:18px;font-size:15px;font-weight:600;color:var(--primary);text-align:center;line-height:1.6;">
+        <div style="margin-top:18px;font-size:15px;font-weight:600;color:var(--primary);text-align:center;line-height:1.6;animation:viewFade 0.4s 0.85s both;">
           לכל מקום שנרצה בכל דרך שנבחר 🐆
         </div>
         <button id="btn-success-continue" class="btn btn-primary" style="margin-top:22px;animation:viewFade 0.4s 0.9s both;">
           ← לדשבורד
         </button>
       </div>
+      <div class="success-progress" id="success-progress"></div>
     </div>`;
 }
 
@@ -1477,23 +1524,43 @@ function attachAll() {
     })
   );
 
-  // Stars — click + hover preview
+  // Stars — click + touch + hover preview
   document.querySelectorAll('.star[data-criterion]').forEach(el => {
+    // iOS press feedback — instantaneous (0ms)
+    el.addEventListener('touchstart', () => {
+      el.style.transform = 'scale(0.82)';
+    }, { passive: true });
+    el.addEventListener('touchend', () => {
+      el.style.transform = '';
+    }, { passive: true });
+
     // click
     el.addEventListener('click', () => {
-      haptic('star');
       const crit = el.dataset.criterion;
       const val  = parseInt(el.dataset.val);
-      S.form.scores[crit] = val;
+      const prev = S.form.scores[crit] || 0;
+      // #5 haptic: first rating vs change
+      haptic(prev === 0 ? 'medium' : 'star');
+      // #2 reset: tap same star again → clear to 0
+      const newVal = (prev === val) ? 0 : val;
+      S.form.scores[crit] = newVal;
       const row = el.closest('[data-crit]');
       if (row) {
         row.querySelectorAll('.star').forEach(s => {
           s.classList.remove('on','off','preview');
-          s.classList.add(parseInt(s.dataset.val) <= val ? 'on' : 'off');
+          s.classList.add(parseInt(s.dataset.val) <= newVal ? 'on' : 'off');
         });
-        // spring bounce on clicked star
-        el.style.transform = 'scale(1.4)';
-        setTimeout(() => { el.style.transform = ''; }, 180);
+        // #6 spring pop animation
+        el.classList.remove('popping');
+        void el.offsetWidth; // force reflow
+        el.classList.add('popping');
+        setTimeout(() => el.classList.remove('popping'), 280);
+        // #4 update numeric label
+        const lbl = document.getElementById('lbl-' + esc(crit));
+        if (lbl) {
+          lbl.textContent = newVal > 0 ? newVal + '/5' : '';
+          lbl.classList.toggle('visible', newVal > 0);
+        }
       }
       updateSectionProgress();
     });
@@ -1564,6 +1631,11 @@ function attachAll() {
     await saveEval(ev);
     S.successData = ev;
     S.direction = 'forward'; S.view = 'success'; render();
+    setTimeout(() => haptic('light'), 650);
+    requestAnimationFrame(() => {
+      const bar = document.getElementById('success-progress');
+      if (bar) requestAnimationFrame(() => { bar.style.width = '100%'; });
+    });
     S._successTimer = setTimeout(() => { S.direction = 'fade'; S.view = 'dashboard'; render(); }, 4000);
   });
 
